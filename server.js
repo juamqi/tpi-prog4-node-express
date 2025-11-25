@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const { db } = require('./config/firebase');
 const authRoutes = require('./src/routes/authRoutes');
+const resellerRoutes = require('./src/routes/resellerRoutes');
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/resellers', resellerRoutes);
 app.use((req, res) => {
   res.status(404).json({
     success: false,
