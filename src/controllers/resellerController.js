@@ -52,6 +52,33 @@ class ResellerController {
         });
     }
     }
+    async updatePhoto(req, res) {
+  try {
+    const userId = req.user.userId;
+    const { photoURL } = req.body;
+    
+    const updatedProfile = await resellerService.updatePhoto(userId, photoURL);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Foto de perfil actualizada exitosamente',
+      data: updatedProfile
+    });
+  } catch (error) {
+    if (error.message === 'Usuario no encontrado' || error.message === 'No eres un revendedor') {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Error al actualizar foto',
+      error: error.message
+    });
+  }
+}
 }
 
 module.exports = new ResellerController();

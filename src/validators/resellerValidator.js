@@ -20,6 +20,13 @@ const updateProfileSchema = Joi.object({
   'object.min': 'Debes proporcionar al menos un campo para actualizar'
 });
 
+const updatePhotoSchema = Joi.object({
+  photoURL: Joi.string().uri().required().messages({
+    'string.uri': 'La URL de la foto debe ser valida',
+    'any.required': 'La URL de la foto es obligatoria'
+  })
+});
 module.exports = {
-  updateProfileSchema
+  updateProfileSchema,
+  updatePhotoSchema
 };

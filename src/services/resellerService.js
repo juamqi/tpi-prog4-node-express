@@ -72,6 +72,26 @@ class ResellerService {
 
   return await this.getProfile(userId);
 }
+async updatePhoto(userId, photoURL) {
+  const userDoc = await db.collection('users').doc(userId).get();
+  
+  if (!userDoc.exists) {
+    throw new Error('Usuario no encontrado');
+  }
+
+  const userData = userDoc.data();
+
+  if (userData.userType !== 'reseller') {
+    throw new Error('No eres un revendedor');
+  }
+
+  await db.collection('users').doc(userId).update({
+    photoURL: photoURL,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+  });
+
+  return await this.getProfile(userId);
+}
 }
 
 module.exports = new ResellerService();
