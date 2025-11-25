@@ -1,4 +1,5 @@
 const { db } = require('../../config/firebase');
+const { admin } = require('../../config/firebase');
 
 class ResellerService {
   async getProfile(userId) {
@@ -39,6 +40,38 @@ class ResellerService {
       updatedAt: userData.updatedAt
     };
   }
+  async updateProfile(userId, updateData) {
+  const userDoc = await db.collection('users').doc(userId).get();
+  
+  if (!userDoc.exists) {
+    throw new Error('Usuario no encontrado');
+  }
+
+  const userData = userDoc.data();
+
+  if (userData.userType !== 'reseller') {
+    throw new Error('No eres un revendedor');
+  }
+
+  const allowedFields = ['firstName', 'lastName', 'phone', 'website', 'photoURL'];
+  const updates = {};
+  
+  allowedFields.forEach(field => {
+    if (updateData[field] !== undefined) {
+      updates[field] = updateData[field];
+    }
+  });
+
+  if (Object.keys(updates).length === 0) {
+    throw new Error('No hay campos validos para actualizar');
+  }
+
+  updates.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+
+  await db.collection('users').doc(userId).update(updates);
+
+  return await this.getProfile(userId);
+}
 }
 
 module.exports = new ResellerService();
