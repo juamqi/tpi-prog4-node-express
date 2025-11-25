@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { validate } = require('../middlewares/validatorMiddleware');
-const { registerResellerSchema, registerSupplierSchema, loginSchema, refreshTokenSchema } = require('../validators/authValidator');
+const { registerResellerSchema, registerSupplierSchema, loginSchema, refreshTokenSchema, forgotPasswordSchema, resetPasswordSchema } = require('../validators/authValidator');
 const { authenticate } = require('../middlewares/authMiddleware');
 
 router.post(
@@ -29,6 +29,17 @@ router.post(
   '/refresh-token',
   validate(refreshTokenSchema),
   authController.refreshToken
+);
+router.post(
+  '/forgot-password',
+  validate(forgotPasswordSchema),
+  authController.forgotPassword
+);
+
+router.post(
+  '/reset-password',
+  validate(resetPasswordSchema),
+  authController.resetPassword
 );
 
 module.exports = router;

@@ -119,6 +119,48 @@ class AuthController {
       });
     }
   }
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+      const result = await authService.forgotPassword(email);
+      
+      res.status(200).json({
+        success: true,
+        message: result.message
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error al procesar solicitud',
+        error: error.message
+      });
+    }
+  }
+
+  async resetPassword(req, res) {
+    try {
+      const { token, newPassword } = req.body;
+      const result = await authService.resetPassword(token, newPassword);
+      
+      res.status(200).json({
+        success: true,
+        message: result.message
+      });
+    } catch (error) {
+      if (error.message.includes('invalido') || error.message.includes('expirado')) {
+        return res.status(401).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Error al restablecer contraseña',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();

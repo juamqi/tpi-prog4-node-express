@@ -3,6 +3,30 @@ const jwt = require('jsonwebtoken');
 const { db, admin } = require('../../config/firebase');
 
 class AuthService {
+    async generateTokens(userId, email, userType) {
+        const accessToken = jwt.sign(
+        { userId, email, userType },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN }
+        );
+
+        const refreshToken = jwt.sign(
+        { userId, email, userType },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+        );
+
+        await db.collection('refreshTokens').add({
+        userId,
+        token: refreshToken,
+        isValid: true,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        expiresAt: admin.firestore.Timestamp.fromDate(
+            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        )
+        });
+        return { accessToken, refreshToken };
+    }
   async registerReseller(userData) {
     const { email, password, firstName, lastName, phone, website } = userData;
 
@@ -56,14 +80,11 @@ class AuthService {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    const token = jwt.sign(
-      { userId, email, userType: 'reseller' },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-    );
+    const { accessToken, refreshToken } = await this.generateTokens(userId, email, 'reseller');
 
     return {
-      token,
+      token:accessToken,
+      refreshToken,
       user: {
         userId,
         email,
@@ -131,14 +152,11 @@ class AuthService {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    const token = jwt.sign(
-      { userId, email, userType: 'supplier' },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-    );
+    const { accessToken, refreshToken } = await this.generateTokens(userId, email, 'supplier');
 
     return {
-      token,
+      token: accessToken,
+      refreshToken,
       user: {
         userId,
         email,
@@ -174,10 +192,10 @@ class AuthService {
       throw new Error('Credenciales invalidas');
     }
 
-    const token = jwt.sign(
-      { userId, email: userData.email, userType: userData.userType },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    const { accessToken, refreshToken } = await this.generateTokens(
+    userId,
+    userData.email,
+    userData.userType
     );
 
     let additionalData = {};
@@ -195,7 +213,8 @@ class AuthService {
     }
 
     return {
-      token,
+      token: accessToken,
+      refreshToken,
       user: {
         userId,
         email: userData.email,
@@ -257,35 +276,135 @@ class AuthService {
       throw new Error('Refresh token expirado');
     }
 
-    const newAccessToken = jwt.sign(
-      { userId: decoded.userId, email: decoded.email, userType: decoded.userType },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
-    );
-
-    const newRefreshToken = jwt.sign(
-      { userId: decoded.userId, email: decoded.email, userType: decoded.userType },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
-    );
-
     await tokenDoc.ref.update({ isValid: false });
 
-    await db.collection('refreshTokens').add({
-      userId: decoded.userId,
-      token: newRefreshToken,
-      isValid: true,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      expiresAt: admin.firestore.Timestamp.fromDate(
-        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-      )
-    });
-
+    const { accessToken, refreshToken } = await this.generateTokens(
+    decoded.userId,
+    decoded.email,
+    decoded.userType
+    );
     return {
-      token: newAccessToken,
-      refreshToken: newRefreshToken
+        token: accessToken,
+        refreshToken
     };
   }
+    async forgotPassword(email) {
+    const usersRef = db.collection('users');
+    const userSnapshot = await usersRef.where('email', '==', email).get();
+    
+    if (userSnapshot.empty) {
+        return { message: 'Si el email existe, recibiras un correo con instrucciones' };
+    }
+
+    const userDoc = userSnapshot.docs[0];
+    const userId = userDoc.id;
+
+    const resetToken = jwt.sign(
+        { userId, email, type: 'password-reset' },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
+
+    await db.collection('passwordResets').add({
+        userId,
+        token: resetToken,
+        email,
+        isUsed: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        expiresAt: admin.firestore.Timestamp.fromDate(
+        new Date(Date.now() + 60 * 60 * 1000) // 1 hora
+        )
+    });
+
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+        }
+    });
+
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    
+    await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: email,
+        subject: 'Recuperacion de contraseña - TangoShop',
+        html: `
+        <h2>Recuperacion de contraseña</h2>
+        <p>Has solicitado restablecer tu contraseña.</p>
+        <p>Haz clic en el siguiente enlace para continuar:</p>
+        <a href="${resetUrl}">Restablecer contraseña</a>
+        <p>Este enlace expira en 1 hora.</p>
+        <p>Si no solicitaste esto, ignora este correo.</p>
+        `
+    });
+
+    return { message: 'Si el email existe, recibiras un correo con instrucciones' };
+    }
+
+    async resetPassword(token, newPassword) {
+    let decoded;
+    
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        if (decoded.type !== 'password-reset') {
+        throw new Error('Token invalido');
+        }
+    } catch (error) {
+        throw new Error('Token invalido o expirado');
+    }
+
+    const resetTokensRef = db.collection('passwordResets');
+    const tokenSnapshot = await resetTokensRef
+        .where('token', '==', token)
+        .where('isUsed', '==', false)
+        .get();
+
+    if (tokenSnapshot.empty) {
+        throw new Error('Token invalido o ya utilizado');
+    }
+
+    const tokenDoc = tokenSnapshot.docs[0];
+    const tokenData = tokenDoc.data();
+
+    if (tokenData.expiresAt.toDate() < new Date()) {
+        throw new Error('Token expirado');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    const usersRef = db.collection('users');
+    const userSnapshot = await usersRef.where('email', '==', decoded.email).get();
+    
+    if (userSnapshot.empty) {
+        throw new Error('Usuario no encontrado');
+    }
+
+    await userSnapshot.docs[0].ref.update({
+        password: hashedPassword,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    await tokenDoc.ref.update({ isUsed: true });
+
+    const refreshTokensRef = db.collection('refreshTokens');
+    const userTokens = await refreshTokensRef
+        .where('userId', '==', decoded.userId)
+        .where('isValid', '==', true)
+        .get();
+
+    const batch = db.batch();
+    userTokens.docs.forEach(doc => {
+        batch.update(doc.ref, { isValid: false });
+    });
+    await batch.commit();
+
+    return { message: 'Contraseña restablecida exitosamente' };
+    }
 }
+
 
 module.exports = new AuthService()

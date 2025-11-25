@@ -87,11 +87,34 @@ const refreshTokenSchema = Joi.object({
     'any.required': 'El refresh token es obligatorio'
   })
 });
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    'string.email': 'El email debe ser valido',
+    'any.required': 'El email es obligatorio'
+  })
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    'any.required': 'El token es obligatorio'
+  }),
+  newPassword: Joi.string()
+    .min(8)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .required()
+    .messages({
+      'string.min': 'La contraseña debe tener al menos 8 caracteres',
+      'string.pattern.base': 'La contraseña debe contener mayusculas, minusculas y numeros',
+      'any.required': 'La nueva contraseña es obligatoria'
+    })
+});
 
 
 module.exports = {
   registerResellerSchema,
   registerSupplierSchema,
   loginSchema,
-  refreshTokenSchema
+  refreshTokenSchema,
+  resetPasswordSchema,
+  forgotPasswordSchema
 };
