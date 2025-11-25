@@ -1,58 +1,71 @@
 /**
  * Configuración de Firebase Admin SDK
  * 
- * Este módulo inicializa Firebase usando variables de entorno en lugar
- * del archivo serviceAccountKey.json directamente, siguiendo mejores
+ * Este módulo inicializa Firebase usando el archivo serviceAccountKey.json
+ * mediante una referencia en las variables de entorno, siguiendo mejores
  * prácticas de seguridad.
  * 
  * Variables de entorno requeridas:
- * - FIREBASE_PROJECT_ID
- * - FIREBASE_CLIENT_EMAIL
- * - FIREBASE_PRIVATE_KEY
- * - FIREBASE_STORAGE_BUCKET
+ * - FIREBASE_SERVICE_ACCOUNT_PATH: Ruta al archivo serviceAccountKey.json
+ * - FIREBASE_STORAGE_BUCKET: Bucket de almacenamiento de Firebase
  */
 
 const admin = require('firebase-admin');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Inicializar Firebase Admin SDK
  * 
- * Verifica que las variables de entorno necesarias estén presentes
- * antes de intentar inicializar Firebase
+ * Lee las credenciales desde el archivo JSON referenciado en .env
  */
 const initializeFirebase = () => {
-  // Validar que las variables de entorno estén presentes
-  const requiredEnvVars = [
-    'FIREBASE_PROJECT_ID',
-    'FIREBASE_CLIENT_EMAIL',
-    'FIREBASE_PRIVATE_KEY',
-    'FIREBASE_STORAGE_BUCKET'
-  ];
+  try {
+    // Verificar que exista la ruta al archivo de credenciales
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+      throw new Error(
+        'La variable de entorno FIREBASE_SERVICE_ACCOUNT_PATH no está configurada.\n' +
+        'Por favor, agrega esta línea a tu archivo .env:\n' +
+        'FIREBASE_SERVICE_ACCOUNT_PATH=./serviceAccountKey.json'
+      );
+    }
 
-  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-  if (missingVars.length > 0) {
-    throw new Error(
-      `Faltan las siguientes variables de entorno de Firebase: ${missingVars.join(', ')}\n` +
-      'Por favor, configura estas variables en tu archivo .env'
+    // Construir ruta absoluta al archivo de credenciales
+    const serviceAccountPath = path.resolve(
+      __dirname, 
+      '..', 
+      process.env.FIREBASE_SERVICE_ACCOUNT_PATH
     );
+
+    // Verificar que el archivo existe
+    if (!fs.existsSync(serviceAccountPath)) {
+      throw new Error(
+        `No se encuentra el archivo de credenciales de Firebase en: ${serviceAccountPath}\n` +
+        'Verifica que el archivo serviceAccountKey.json existe en la raíz del proyecto.'
+      );
+    }
+
+    // Leer el archivo de credenciales
+    const serviceAccount = require(serviceAccountPath);
+
+    // Verificar que el storage bucket esté configurado
+    const storageBucket = process.env.FIREBASE_STORAGE_BUCKET || 
+                         `${serviceAccount.project_id}.appspot.com`;
+
+    // Inicializar Firebase Admin
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      storageBucket: storageBucket
+    });
+
+    console.log('✅ Firebase Admin SDK inicializado correctamente');
+    console.log(`📁 Project ID: ${serviceAccount.project_id}`);
+    console.log(`🪣 Storage Bucket: ${storageBucket}`);
+
+  } catch (error) {
+    console.error('❌ Error al inicializar Firebase:', error.message);
+    process.exit(1); // Detener la aplicación si Firebase no se puede inicializar
   }
-
-  // Configurar credenciales desde variables de entorno
-  const serviceAccount = {
-    type: 'service_account',
-    project_id: process.env.FIREBASE_PROJECT_ID,
-    private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  };
-
-  // Inicializar Firebase Admin
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
-  });
-
-  console.log('✅ Firebase Admin SDK inicializado correctamente');
 };
 
 // Inicializar Firebase
