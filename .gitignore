@@ -1,10 +1,62 @@
+# ============================================
+# DEPENDENCIAS
+# ============================================
 node_modules/
 
+# ============================================
+# CREDENCIALES Y CONFIGURACIÓN SENSIBLE
+# ============================================
+# Archivo de credenciales de Firebase
 serviceAccountKey.json
 
+# Variables de entorno (contiene secrets)
 .env
+.env.local
+.env.*.local
 
+# ============================================
+# ARCHIVOS DE LOG
+# ============================================
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
+# ============================================
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# ============================================
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+
+# ============================================
+# ARCHIVOS DEL IDE
+# ============================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# ARCHIVOS TEMPORALES Y CACHE
+# ============================================
+.cache/
+.temp/
+tmp/
+dist/
+build/
+
+# ============================================
+# COBERTURA DE TESTING
+# ============================================
+coverage/
+.nyc_output/
+
+# ============================================
+# ARCHIVOS DE UPLOADS (si aplica)
+# ============================================
+uploads/
+public/uploads/
