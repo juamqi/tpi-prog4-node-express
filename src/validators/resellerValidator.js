@@ -26,7 +26,26 @@ const updatePhotoSchema = Joi.object({
     'any.required': 'La URL de la foto es obligatoria'
   })
 });
+const getResellerByIdSchema = Joi.object({
+  id: Joi.string().required().messages({
+    'any.required': 'El ID del revendedor es obligatorio',
+    'string.empty': 'El ID del revendedor no puede estar vaco'
+  })
+});
+const listResellersSchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1).optional().messages({
+    'number.base': 'La pagina debe ser un numero',
+    'number.min': 'La pagina debe ser mayor a 0'
+  }),
+  limit: Joi.number().integer().min(1).max(50).default(10).optional().messages({
+    'number.base': 'El limite debe ser un número',
+    'number.min': 'El limite debe ser mayor a 0',
+    'number.max': 'El limite máximo es 50'
+  })
+});
 module.exports = {
   updateProfileSchema,
-  updatePhotoSchema
+  updatePhotoSchema,
+  getResellerByIdSchema,
+  listResellersSchema
 };
