@@ -209,6 +209,83 @@ class AuthService {
       }
     };
   }
+    async logout(userId, token) {
+    const refreshTokensRef = db.collection('refreshTokens');
+    const tokenSnapshot = await refreshTokensRef
+      .where('userId', '==', userId)
+      .where('token', '==', token)
+      .where('isValid', '==', true)
+      .get();
+
+    if (tokenSnapshot.empty) {
+      throw new Error('Token no encontrado');
+    }
+
+    const batch = db.batch();
+    tokenSnapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { isValid: false });
+    });
+    await batch.commit();
+
+    return { message: 'Logout exitoso' };
+  }
+
+  async refreshToken(oldRefreshToken) {
+    let decoded;
+    
+    try {
+      decoded = jwt.verify(oldRefreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (error) {
+      throw new Error('Refresh token ivalido o expirado');
+    }
+
+    const refreshTokensRef = db.collection('refreshTokens');
+    const tokenSnapshot = await refreshTokensRef
+      .where('token', '==', oldRefreshToken)
+      .where('isValid', '==', true)
+      .get();
+
+    if (tokenSnapshot.empty) {
+      throw new Error('Refresh token no valido');
+    }
+
+    const tokenDoc = tokenSnapshot.docs[0];
+    const tokenData = tokenDoc.data();
+
+    if (tokenData.expiresAt.toDate() < new Date()) {
+      await tokenDoc.ref.update({ isValid: false });
+      throw new Error('Refresh token expirado');
+    }
+
+    const newAccessToken = jwt.sign(
+      { userId: decoded.userId, email: decoded.email, userType: decoded.userType },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+    );
+
+    const newRefreshToken = jwt.sign(
+      { userId: decoded.userId, email: decoded.email, userType: decoded.userType },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+    );
+
+    await tokenDoc.ref.update({ isValid: false });
+
+    await db.collection('refreshTokens').add({
+      userId: decoded.userId,
+      token: newRefreshToken,
+      isValid: true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      expiresAt: admin.firestore.Timestamp.fromDate(
+        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      )
+    });
+
+    return {
+      token: newAccessToken,
+      refreshToken: newRefreshToken
+    };
+  }
 }
 
 module.exports = new AuthService()

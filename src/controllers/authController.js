@@ -73,6 +73,52 @@ class AuthController {
       });
     }
   }
+
+    async logout(req, res) {
+    try {
+      const { refreshToken } = req.body;
+      const userId = req.user.userId;
+
+      await authService.logout(userId, refreshToken);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Logout exitoso'
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error al cerrar sesion',
+        error: error.message
+      });
+    }
+  }
+
+  async refreshToken(req, res) {
+    try {
+      const { refreshToken } = req.body;
+      const result = await authService.refreshToken(refreshToken);
+      
+      res.status(200).json({
+        success: true,
+        message: 'Token renovado exitosamente',
+        data: result
+      });
+    } catch (error) {
+      if (error.message.includes('inválido') || error.message.includes('expirado')) {
+        return res.status(401).json({
+          success: false,
+          message: error.message
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Error al renovar token',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();

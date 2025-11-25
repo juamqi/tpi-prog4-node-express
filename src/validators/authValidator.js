@@ -82,10 +82,16 @@ const loginSchema = Joi.object({
     'any.required': 'La contraseña es obligatoria'
   })
 });
+const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required().messages({
+    'any.required': 'El refresh token es obligatorio'
+  })
+});
 
 
 module.exports = {
   registerResellerSchema,
   registerSupplierSchema,
-  loginSchema
+  loginSchema,
+  refreshTokenSchema
 };
