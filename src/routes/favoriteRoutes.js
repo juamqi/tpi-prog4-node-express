@@ -40,15 +40,14 @@ router.put(
   validate(markupSchema),
   favoriteController.setProductMarkup
 );
+router.get(
+  '/:productId',
+  favoriteController.getFavoriteDetail
+);
 
 router.delete(
   '/:productId',
   favoriteController.removeFavorite
-);
-
-router.get(
-  '/:productId',
-  favoriteController.getFavoriteDetail
 );
 
 module.exports = router;

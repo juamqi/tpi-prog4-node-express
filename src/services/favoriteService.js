@@ -408,6 +408,47 @@ class FavoriteService {
 
     return Math.round(finalPrice * 100) / 100; 
   }
+  async _enrichProductsData(products) {
+    if (products.length === 0) return [];
+
+    const supplierIds = [...new Set(products.map(p => p.supplierId))];
+    const categoryIds = [...new Set(products.map(p => p.categoryId))];
+
+    const suppliersData = {};
+    for (const supplierId of supplierIds) {
+      try {
+        const supplierDoc = await db.collection('suppliers').doc(supplierId).get();
+        if (supplierDoc.exists) {
+          suppliersData[supplierId] = {
+            companyName: supplierDoc.data().companyName,
+            address: supplierDoc.data().address
+          };
+        }
+      } catch (error) {
+        console.error(`Error al obtener proveedor ${supplierId}:`, error);
+      }
+    }
+
+    const categoriesData = {};
+    for (const categoryId of categoryIds) {
+      try {
+        const categoryDoc = await db.collection('categories').doc(categoryId).get();
+        if (categoryDoc.exists) {
+          categoriesData[categoryId] = {
+            name: categoryDoc.data().name
+          };
+        }
+      } catch (error) {
+        console.error(`Error al obtener categoría ${categoryId}:`, error);
+      }
+    }
+
+    return products.map(product => ({
+      ...product,
+      supplier: suppliersData[product.supplierId] || null,
+      category: categoriesData[product.categoryId] || null
+    }));
+  }
   //sorianicolas
   async getFavoriteDetail(resellerId, productId) {
     const favoriteSnapshot = await db.collection('favorites')
