@@ -1,18 +1,7 @@
-/**
- * Controlador de Productos
- * 
- * Maneja las peticiones HTTP relacionadas con productos
- * y delega la lógica de negocio al servicio correspondiente
- */
-
+//sebastian panozzo
 const productService = require('../services/productService');
 
 class ProductController {
-  /**
-   * POST /products
-   * Crear un nuevo producto
-   * Solo proveedores autenticados
-   */
   async createProduct(req, res) {
     try {
       const supplierId = req.user.userId;
@@ -42,11 +31,6 @@ class ProductController {
     }
   }
 
-  /**
-   * GET /products
-   * Listar productos con filtros opcionales
-   * Público (no requiere autenticación)
-   */
   async listProducts(req, res) {
     try {
       const filters = {
@@ -76,11 +60,7 @@ class ProductController {
     }
   }
 
-  /**
-   * GET /products/search
-   * Buscar productos por nombre
-   * Público
-   */
+
   async searchProducts(req, res) {
     try {
       const searchTerm = req.query.name;
@@ -116,11 +96,7 @@ class ProductController {
     }
   }
 
-  /**
-   * GET /products/top-rated
-   * Obtener productos mejor valorados
-   * Público
-   */
+
   async getTopRatedProducts(req, res) {
     try {
       const limit = parseInt(req.query.limit) || 10;
@@ -140,11 +116,6 @@ class ProductController {
     }
   }
 
-  /**
-   * GET /products/recent
-   * Obtener productos más recientes
-   * Público
-   */
   async getRecentProducts(req, res) {
     try {
       const limit = parseInt(req.query.limit) || 10;
@@ -164,11 +135,6 @@ class ProductController {
     }
   }
 
-  /**
-   * GET /products/:id
-   * Obtener detalle de un producto
-   * Público
-   */
   async getProductById(req, res) {
     try {
       const productId = req.params.id;
@@ -194,11 +160,6 @@ class ProductController {
     }
   }
 
-  /**
-   * PUT /products/:id
-   * Actualizar un producto
-   * Solo el proveedor dueño
-   */
   async updateProduct(req, res) {
     try {
       const productId = req.params.id;
@@ -235,11 +196,6 @@ class ProductController {
     }
   }
 
-  /**
-   * PUT /products/:id/photo
-   * Actualizar foto de un producto
-   * Solo el proveedor dueño
-   */
   async updateProductPhoto(req, res) {
     try {
       const productId = req.params.id;
@@ -283,11 +239,6 @@ class ProductController {
     }
   }
 
-  /**
-   * DELETE /products/:id
-   * Eliminar un producto (soft delete)
-   * Solo el proveedor dueño
-   */
   async deleteProduct(req, res) {
     try {
       const productId = req.params.id;

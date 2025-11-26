@@ -1,10 +1,4 @@
-/**
- * Helper para manejo de uploads a Firebase Storage
- * 
- * Proporciona funciones utilitarias para subir, eliminar y
- * obtener URLs de archivos en Firebase Storage
- */
-
+//sebastian panozzo
 const { storage } = require('../../config/firebase');
 const path = require('path');
 
@@ -21,12 +15,10 @@ const path = require('path');
  */
 const uploadFile = async (file, folder, customName = null) => {
   try {
-    // Validar que se haya proporcionado un archivo
     if (!file) {
       throw new Error('No se proporcionó ningún archivo');
     }
 
-    // Generar nombre único para el archivo
     const timestamp = Date.now();
     const extension = path.extname(file.originalname);
     const fileName = customName 
@@ -35,11 +27,9 @@ const uploadFile = async (file, folder, customName = null) => {
     
     const filePath = `${folder}/${fileName}`;
 
-    // Obtener referencia al bucket de Storage
     const bucket = storage.bucket();
     const fileUpload = bucket.file(filePath);
 
-    // Crear stream de escritura
     const stream = fileUpload.createWriteStream({
       metadata: {
         contentType: file.mimetype,
@@ -49,7 +39,6 @@ const uploadFile = async (file, folder, customName = null) => {
       }
     });
 
-    // Promesa para manejar el upload
     return new Promise((resolve, reject) => {
       stream.on('error', (error) => {
         reject(new Error(`Error al subir archivo: ${error.message}`));
@@ -57,18 +46,13 @@ const uploadFile = async (file, folder, customName = null) => {
 
       stream.on('finish', async () => {
         try {
-          // Hacer el archivo público
-          await fileUpload.makePublic();
-          
-          // Generar URL pública
+          await fileUpload.makePublic(); 
           const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
           resolve(publicUrl);
         } catch (error) {
           reject(new Error(`Error al generar URL pública: ${error.message}`));
         }
       });
-
-      // Escribir el buffer del archivo al stream
       stream.end(file.buffer);
     });
   } catch (error) {
@@ -89,7 +73,6 @@ const deleteFile = async (fileUrl) => {
   try {
     if (!fileUrl) return;
 
-    // Extraer el path del archivo de la URL
     const bucket = storage.bucket();
     const baseUrl = `https://storage.googleapis.com/${bucket.name}/`;
     
@@ -101,18 +84,16 @@ const deleteFile = async (fileUrl) => {
     const filePath = fileUrl.replace(baseUrl, '');
     const file = bucket.file(filePath);
 
-    // Verificar si el archivo existe antes de intentar eliminarlo
     const [exists] = await file.exists();
     
     if (exists) {
       await file.delete();
-      console.log(`✅ Archivo eliminado: ${filePath}`);
+      console.log(`Archivo eliminado: ${filePath}`);
     } else {
-      console.warn(`⚠️ Archivo no existe: ${filePath}`);
+      console.warn(`Archivo no existe: ${filePath}`);
     }
   } catch (error) {
-    console.error(`❌ Error al eliminar archivo: ${error.message}`);
-    // No lanzar error para evitar que falle la operación principal
+    console.error(`Error al eliminar archivo: ${error.message}`);
   }
 };
 
@@ -131,10 +112,8 @@ const deleteFile = async (fileUrl) => {
  */
 const updateFile = async (newFile, oldFileUrl, folder, customName = null) => {
   try {
-    // Subir el nuevo archivo
     const newFileUrl = await uploadFile(newFile, folder, customName);
     
-    // Eliminar el archivo anterior (sin esperar a que termine)
     if (oldFileUrl) {
       deleteFile(oldFileUrl).catch(err => {
         console.error('Error al eliminar archivo anterior:', err);

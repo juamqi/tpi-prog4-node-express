@@ -1,22 +1,11 @@
-/**
- * Middleware para manejo de uploads de imágenes
- * 
- * Utiliza Multer para procesar archivos multipart/form-data
- * y valida que sean imágenes con tamaño apropiado
- */
-
+//sebastian panozzo
 const multer = require('multer');
 const { isImage, isValidSize } = require('../utils/uploadHelper');
 
-/**
- * Configuración de Multer para almacenamiento en memoria
- * Los archivos se guardan en buffer para luego subirlos a Firebase Storage
- */
+
 const storage = multer.memoryStorage();
 
-/**
- * Filtro de archivos para aceptar solo imágenes
- */
+
 const fileFilter = (req, file, cb) => {
   if (isImage(file)) {
     cb(null, true);
@@ -25,14 +14,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-/**
- * Configuración de Multer
- */
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB máximo
+    fileSize: 5 * 1024 * 1024, 
   }
 });
 
@@ -48,7 +34,6 @@ const uploadImage = (req, res, next) => {
   
   uploadSingle(req, res, (err) => {
     if (err instanceof multer.MulterError) {
-      // Error de Multer
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({
           success: false,
@@ -61,14 +46,12 @@ const uploadImage = (req, res, next) => {
         message: `Error al subir archivo: ${err.message}`
       });
     } else if (err) {
-      // Error personalizado (del fileFilter)
       return res.status(400).json({
         success: false,
         message: err.message
       });
     }
     
-    // Validación adicional del tamaño
     if (req.file && !isValidSize(req.file)) {
       return res.status(400).json({
         success: false,
@@ -80,10 +63,6 @@ const uploadImage = (req, res, next) => {
   });
 };
 
-/**
- * Middleware para validar que se haya subido una imagen
- * Debe usarse después de uploadImage
- */
 const requireImage = (req, res, next) => {
   if (!req.file) {
     return res.status(400).json({
@@ -94,10 +73,6 @@ const requireImage = (req, res, next) => {
   next();
 };
 
-/**
- * Middleware para subir imagen de forma opcional
- * No genera error si no se proporciona archivo
- */
 const uploadOptionalImage = (req, res, next) => {
   const uploadSingle = upload.single('photo');
   
@@ -121,7 +96,6 @@ const uploadOptionalImage = (req, res, next) => {
       });
     }
     
-    // Validación adicional del tamaño solo si hay archivo
     if (req.file && !isValidSize(req.file)) {
       return res.status(400).json({
         success: false,

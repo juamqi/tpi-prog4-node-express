@@ -1,10 +1,4 @@
-/**
- * Servicio de Productos
- * 
- * Lógica de negocio para operaciones CRUD de productos
- * y funcionalidades adicionales como búsqueda y filtrado
- */
-
+//sebastian panozzo
 const { db, admin } = require('../../config/firebase');
 const { uploadFile, updateFile, deleteFile } = require('../utils/uploadHelper');
 
@@ -21,13 +15,11 @@ class ProductService {
   async createProduct(productData, supplierId, file = null) {
     const { name, description, price, categoryId } = productData;
 
-    // Verificar que la categoría exista
     const categoryDoc = await db.collection('categories').doc(categoryId).get();
     if (!categoryDoc.exists) {
       throw new Error('La categoría especificada no existe');
     }
 
-    // Preparar datos del producto
     const productPayload = {
       supplierId,
       categoryId,
@@ -43,11 +35,9 @@ class ProductService {
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
-    // Crear producto en Firestore
     const productRef = await db.collection('products').add(productPayload);
     const productId = productRef.id;
 
-    // Subir foto si se proporcionó
     let photoURL = '';
     if (file) {
       try {
@@ -55,17 +45,14 @@ class ProductService {
         await productRef.update({ photoURL });
       } catch (error) {
         console.error('Error al subir foto del producto:', error);
-        // No fallar la creación si falla el upload de la foto
       }
     }
 
-    // Incrementar contador de productos del proveedor
     const supplierRef = db.collection('suppliers').doc(supplierId);
     await supplierRef.update({
       'stats.totalProducts': admin.firestore.FieldValue.increment(1)
     });
 
-    // Incrementar contador de productos de la categoría
     await db.collection('categories').doc(categoryId).update({
       productCount: admin.firestore.FieldValue.increment(1)
     });
@@ -96,70 +83,59 @@ class ProductService {
       page = 1,
       limit = 10
     } = filters;
-
+    //corrijo sin pag de firestor
     let query = db.collection('products').where('isActive', '==', true);
-
-    // Aplicar filtros
-    if (categoryId) {
-      query = query.where('categoryId', '==', categoryId);
-    }
-
-    if (supplierId) {
-      query = query.where('supplierId', '==', supplierId);
-    }
-
-    if (minPrice !== undefined) {
-      query = query.where('price', '>=', parseFloat(minPrice));
-    }
-
-    if (maxPrice !== undefined) {
-      query = query.where('price', '<=', parseFloat(maxPrice));
-    }
-
-    if (minRating !== undefined) {
-      query = query.where('rating', '>=', parseFloat(minRating));
-    }
-
-    // Ordenar por fecha de creación (más recientes primero)
-    query = query.orderBy('createdAt', 'desc');
-
-    // Obtener total de documentos que coinciden (antes de paginar)
-    const countSnapshot = await query.count().get();
-    const totalProducts = countSnapshot.data().count;
-
-    // Aplicar paginación
-    const offset = (page - 1) * limit;
-    query = query.limit(limit).offset(offset);
 
     const snapshot = await query.get();
 
-    // Procesar productos
-    let products = snapshot.docs.map(doc => ({
-      productId: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate()
-    }));
+    let products = [];
+    for (const doc of snapshot.docs) {
+      const productData = doc.data();
+      //filtros en memoria sin paginacion de firesotre
+      if (categoryId && productData.categoryId !== categoryId) continue;
+      if (supplierId && productData.supplierId !== supplierId) continue;
+      if (minPrice !== undefined && productData.price < parseFloat(minPrice)) continue;
+      if (maxPrice !== undefined && productData.price > parseFloat(maxPrice)) continue;
+      if (minRating !== undefined && productData.rating < parseFloat(minRating)) continue;
+      
+      products.push({
+        productId: doc.id,
+        ...productData,
+        createdAt: productData.createdAt?.toDate(),
+        updatedAt: productData.updatedAt?.toDate()
+      });
+    }
 
-    // Filtrar por nombre si se proporcionó (Firestore no soporta LIKE)
     if (name) {
       const searchTerm = name.toLowerCase();
       products = products.filter(product =>
         product.name.toLowerCase().includes(searchTerm)
       );
     }
+      products.sort((a, b) => {
+        const dateA = a.createdAt || new Date(0);
+        const dateB = b.createdAt || new Date(0);
+        return dateB - dateA;
+    });
 
-    // Enriquecer con información de proveedor y categoría
-    const enrichedProducts = await this._enrichProductsData(products);
+
+    const totalProducts = products.length;
+    const totalPages = Math.ceil(totalProducts / limit);
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+
+    const paginatedProducts = products.slice(startIndex, endIndex);
+    const enrichedProducts = await this._enrichProductsData(paginatedProducts);
+
 
     return {
       products: enrichedProducts,
       pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(totalProducts / limit),
+        currentPage: parseInt(page),
+        totalPages,
         totalProducts,
-        productsPerPage: limit,
-        hasNextPage: page < Math.ceil(totalProducts / limit),
+        productsPerPage: parseInt(limit),
+        hasNextPage: page < totalPages,
         hasPreviousPage: page > 1
       }
     };
@@ -177,14 +153,10 @@ class ProductService {
       throw new Error('El término de búsqueda debe tener al menos 2 caracteres');
     }
 
-    // Obtener todos los productos activos
     const snapshot = await db.collection('products')
       .where('isActive', '==', true)
-      .orderBy('rating', 'desc')
-      .limit(100) // Limitar la búsqueda inicial
       .get();
 
-    // Filtrar por nombre en memoria (case-insensitive)
     const searchTermLower = searchTerm.toLowerCase();
     let products = snapshot.docs
       .map(doc => ({
@@ -210,18 +182,30 @@ class ProductService {
   async getTopRatedProducts(limit = 10) {
     const snapshot = await db.collection('products')
       .where('isActive', '==', true)
-      .where('reviewCount', '>', 0) // Solo productos con reseñas
-      .orderBy('reviewCount', 'desc')
-      .orderBy('rating', 'desc')
-      .limit(limit)
       .get();
 
-    const products = snapshot.docs.map(doc => ({
-      productId: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate(),
-      updatedAt: doc.data().updatedAt?.toDate()
-    }));
+    let products = [];
+    for (const doc of snapshot.docs) {
+      const productData = doc.data();
+
+      if (productData.reviewCount > 0) {
+        products.push({
+          productId: doc.id,
+          ...productData,
+          createdAt: productData.createdAt?.toDate(),
+          updatedAt: productData.updatedAt?.toDate()
+        });
+      }
+    }
+
+    products.sort((a, b) => {
+      if (b.rating !== a.rating) {
+        return b.rating - a.rating;
+      }
+      return b.reviewCount - a.reviewCount;
+    });
+
+    products = products.slice(0, limit);
 
     return await this._enrichProductsData(products);
   }
@@ -235,16 +219,19 @@ class ProductService {
   async getRecentProducts(limit = 10) {
     const snapshot = await db.collection('products')
       .where('isActive', '==', true)
-      .orderBy('createdAt', 'desc')
-      .limit(limit)
       .get();
-
-    const products = snapshot.docs.map(doc => ({
+    let products = snapshot.docs.map(doc => ({
       productId: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt?.toDate(),
       updatedAt: doc.data().updatedAt?.toDate()
     }));
+    products.sort((a, b) => {
+      const dateA = a.createdAt || new Date(0);
+      const dateB = b.createdAt || new Date(0);
+      return dateB - dateA;
+    });
+    products = products.slice(0, limit);
 
     return await this._enrichProductsData(products);
   }
@@ -269,7 +256,6 @@ class ProductService {
       updatedAt: productDoc.data().updatedAt?.toDate()
     };
 
-    // Enriquecer con datos de proveedor y categoría
     const enriched = await this._enrichProductsData([productData]);
     return enriched[0];
   }
@@ -293,19 +279,16 @@ class ProductService {
 
     const productData = productDoc.data();
 
-    // Verificar que el proveedor sea el dueño
     if (productData.supplierId !== supplierId) {
       throw new Error('No tienes permiso para modificar este producto');
     }
 
-    // Si se está cambiando la categoría, verificar que exista
     if (updateData.categoryId && updateData.categoryId !== productData.categoryId) {
       const categoryDoc = await db.collection('categories').doc(updateData.categoryId).get();
       if (!categoryDoc.exists) {
         throw new Error('La categoría especificada no existe');
       }
 
-      // Actualizar contadores de categorías
       await db.collection('categories').doc(productData.categoryId).update({
         productCount: admin.firestore.FieldValue.increment(-1)
       });
@@ -314,13 +297,11 @@ class ProductService {
       });
     }
 
-    // Preparar datos de actualización
     const payload = {
       ...updateData,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
-    // Si hay precio, convertirlo a número
     if (payload.price) {
       payload.price = parseFloat(payload.price);
     }
@@ -352,12 +333,10 @@ class ProductService {
 
     const productData = productDoc.data();
 
-    // Verificar que el proveedor sea el dueño
     if (productData.supplierId !== supplierId) {
       throw new Error('No tienes permiso para modificar este producto');
     }
 
-    // Actualizar foto
     const photoURL = await updateFile(
       file,
       productData.photoURL,
@@ -390,23 +369,20 @@ class ProductService {
 
     const productData = productDoc.data();
 
-    // Verificar que el proveedor sea el dueño
     if (productData.supplierId !== supplierId) {
       throw new Error('No tienes permiso para eliminar este producto');
     }
 
-    // Soft delete: marcar como inactivo
     await productRef.update({
       isActive: false,
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    // Actualizar contador de productos del proveedor
+
     await db.collection('suppliers').doc(supplierId).update({
       'stats.totalProducts': admin.firestore.FieldValue.increment(-1)
     });
 
-    // Actualizar contador de productos de la categoría
     await db.collection('categories').doc(productData.categoryId).update({
       productCount: admin.firestore.FieldValue.increment(-1)
     });
@@ -427,11 +403,9 @@ class ProductService {
   async _enrichProductsData(products) {
     if (products.length === 0) return [];
 
-    // Obtener IDs únicos de proveedores y categorías
     const supplierIds = [...new Set(products.map(p => p.supplierId))];
     const categoryIds = [...new Set(products.map(p => p.categoryId))];
 
-    // Obtener datos de proveedores
     const suppliersData = {};
     for (const supplierId of supplierIds) {
       try {
@@ -447,7 +421,6 @@ class ProductService {
       }
     }
 
-    // Obtener datos de categorías
     const categoriesData = {};
     for (const categoryId of categoryIds) {
       try {
@@ -462,7 +435,6 @@ class ProductService {
       }
     }
 
-    // Enriquecer productos
     return products.map(product => ({
       ...product,
       supplier: suppliersData[product.supplierId] || null,

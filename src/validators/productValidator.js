@@ -1,16 +1,6 @@
-/**
- * Validadores de Productos
- * 
- * Esquemas de validación Joi para todas las operaciones
- * relacionadas con productos
- */
-
+//sebastian panozzo
 const Joi = require('joi');
 
-/**
- * Schema para crear un producto
- * Campos requeridos: name, description, price, categoryId
- */
 const createProductSchema = Joi.object({
   name: Joi.string()
     .min(3)
@@ -47,10 +37,6 @@ const createProductSchema = Joi.object({
     })
 });
 
-/**
- * Schema para actualizar un producto
- * Todos los campos son opcionales
- */
 const updateProductSchema = Joi.object({
   name: Joi.string()
     .min(3)
@@ -87,12 +73,7 @@ const updateProductSchema = Joi.object({
   'object.min': 'Debe proporcionar al menos un campo para actualizar'
 });
 
-/**
- * Schema para filtros de búsqueda de productos
- * Validación de query parameters
- */
 const searchProductsSchema = Joi.object({
-  // Filtros de búsqueda
   name: Joi.string()
     .min(2)
     .optional()
@@ -112,7 +93,6 @@ const searchProductsSchema = Joi.object({
       'string.base': 'El ID de proveedor debe ser válido'
     }),
   
-  // Filtros de precio
   minPrice: Joi.number()
     .min(0)
     .optional()
@@ -135,7 +115,6 @@ const searchProductsSchema = Joi.object({
       'number.base': 'El precio máximo debe ser un número válido'
     }),
   
-  // Filtro de puntuación
   minRating: Joi.number()
     .min(0)
     .max(5)
@@ -145,8 +124,7 @@ const searchProductsSchema = Joi.object({
       'number.max': 'La puntuación mínima no puede ser mayor a 5',
       'number.base': 'La puntuación mínima debe ser un número válido'
     }),
-  
-  // Paginación
+
   page: Joi.number()
     .integer()
     .min(1)
@@ -170,9 +148,6 @@ const searchProductsSchema = Joi.object({
     })
 });
 
-/**
- * Schema para validación de parámetros de ID
- */
 const productIdSchema = Joi.object({
   id: Joi.string()
     .required()

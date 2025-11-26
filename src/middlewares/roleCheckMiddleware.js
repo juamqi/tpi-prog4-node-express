@@ -1,11 +1,4 @@
-/**
- * Middleware de verificación de roles
- * 
- * Verifica que el usuario autenticado tenga el rol necesario
- * para acceder a un endpoint específico.
- * 
- * Debe ser usado después del middleware authenticate()
- */
+//sebastian panozzo
 
 /**
  * Verifica que el usuario tenga uno de los roles permitidos
@@ -18,7 +11,6 @@
  */
 const checkRole = (allowedRoles) => {
   return (req, res, next) => {
-    // Verificar que el usuario esté autenticado
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -26,15 +18,12 @@ const checkRole = (allowedRoles) => {
       });
     }
 
-    // Verificar que el usuario tenga un rol asignado
     if (!req.user.userType) {
       return res.status(403).json({
         success: false,
         message: 'Rol de usuario no definido'
       });
     }
-
-    // Verificar que el rol del usuario esté en la lista de roles permitidos
     if (!allowedRoles.includes(req.user.userType)) {
       return res.status(403).json({
         success: false,
@@ -42,21 +31,12 @@ const checkRole = (allowedRoles) => {
       });
     }
 
-    // Usuario tiene permisos, continuar
     next();
   };
 };
 
-/**
- * Middleware específico para verificar que el usuario sea un proveedor
- * Atajo para checkRole(['supplier'])
- */
 const isSupplier = checkRole(['supplier']);
 
-/**
- * Middleware específico para verificar que el usuario sea un revendedor
- * Atajo para checkRole(['reseller'])
- */
 const isReseller = checkRole(['reseller']);
 
 /**
