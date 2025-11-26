@@ -49,7 +49,7 @@ class ReviewService {
     const snap = await db
       .collection('reviews')
       .where('productId', '==', productId)
-      .orderBy('createdAt', 'desc')
+      //.orderBy('createdAt', 'desc')
       .get();
 
     return mapDocs(snap);
@@ -110,7 +110,7 @@ class ReviewService {
     const snap = await db
       .collection('reviews')
       .where('resellerId', '==', resellerId)
-      .orderBy('createdAt', 'desc')
+      //.orderBy('createdAt', 'desc')
       .get();
 
     return mapDocs(snap);

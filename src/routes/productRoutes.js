@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
+const searchController = require('../controllers/searchController');
 const { authenticate } = require('../middlewares/authMiddleware');
 const { isSupplier } = require('../middlewares/roleCheckMiddleware');
 const { validate } = require('../middlewares/validatorMiddleware');
@@ -29,6 +30,16 @@ router.get(
 router.get(
   '/recent',
   productController.getRecentProducts
+);
+
+router.get(
+  '/by-supplier/:supplierId',
+  searchController.getProductsBySupplier
+);
+
+router.get(
+  '/:id/related',
+  searchController.getRelatedProducts
 );
 
 router.get(

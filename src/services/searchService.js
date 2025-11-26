@@ -14,16 +14,17 @@ class SearchService {
     if (searchIn === 'products' || searchIn === 'both') {
       let ref = db.collection('products').where('isActive', '==', true);
 
-      if (query) {
-        ref = ref.where('name', '>=', query).where('name', '<=', `${query}\uf8ff`);
-      }
-
       if (filters.categoryId) {
         ref = ref.where('categoryId', '==', filters.categoryId);
       }
 
       const snap = await ref.get();
       let products = mapDocs(snap);
+
+      const queryLower = query.toLowerCase();
+      if (queryLower) {
+        products = products.filter((p) => (p.name || '').toLowerCase().includes(queryLower));
+      }
 
       if (filters.minPrice !== null && filters.minPrice !== undefined) {
         products = products.filter((p) => p.price >= Number(filters.minPrice));
@@ -41,16 +42,21 @@ class SearchService {
     if (searchIn === 'suppliers' || searchIn === 'both') {
       let ref = db.collection('suppliers');
 
-      if (query) {
-        ref = ref.where('companyName', '>=', query).where('companyName', '<=', `${query}\uf8ff`);
-      }
-
       if (filters.province) {
         ref = ref.where('address.province', '==', filters.province);
       }
 
       const snap = await ref.get();
-      results.suppliers = mapDocs(snap);
+      let suppliers = mapDocs(snap);
+
+      const queryLower = query.toLowerCase();
+      if (queryLower) {
+        suppliers = suppliers.filter((s) =>
+          (s.companyName || '').toLowerCase().includes(queryLower)
+        );
+      }
+
+      results.suppliers = suppliers;
     }
 
     return results;

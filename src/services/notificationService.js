@@ -14,7 +14,7 @@ class NotificationService {
     const snap = await db
       .collection('notifications')
       .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
+      //.orderBy('createdAt', 'desc')
       .get();
 
     return mapDocs(snap);
