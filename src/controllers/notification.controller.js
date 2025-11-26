@@ -1,4 +1,4 @@
-const { db } = require("../config/firebase.js");
+const { db } = require("../../config/firebase.js");
 
 const mapDocs = (snap) => snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
