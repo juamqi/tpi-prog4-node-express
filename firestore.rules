@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /resellers/{resellerId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == resellerId;
+    }
+
+    match /suppliers/{supplierId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == supplierId;
+    }
+
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.token.userType == 'supplier';
+      allow update, delete: if request.auth != null && 
+                             request.auth.uid == resource.data.supplierId;
+    }
+
+    match /favorites/{favoriteId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.token.userType == 'reseller';
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false; // Solo admin puede modificar
+    }
+
+    match /notifications/{notificationId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == resource.data.userId;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null && 
+                     request.auth.token.userType == 'reseller';
+      allow update, delete: if request.auth != null && 
+                             request.auth.uid == resource.data.resellerId;
+    }
+
+    match /refreshTokens/{tokenId} {
+      allow read, write: if request.auth != null && 
+                          request.auth.uid == resource.data.userId;
+    }
+
+    match /passwordResets/{resetId} {
+      allow create: if true;
+      allow read, update: if false; // Solo backend puede leer
+    }
+  }
+}
