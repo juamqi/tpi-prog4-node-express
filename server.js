@@ -5,6 +5,8 @@ require("dotenv").config();
 const { db } = require('./config/firebase');
 const authRoutes = require('./src/routes/authRoutes');
 const resellerRoutes = require('./src/routes/resellerRoutes');
+const supplierRoutes = require('./src/routes/supplierRoutes');
+const categoryRoutes = require('./src/routes/categoryRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const favoriteRoutes = require('./src/routes/favoriteRoutes');
 
@@ -29,6 +31,8 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/resellers', resellerRoutes);
+app.use('/suppliers', supplierRoutes);
+app.use('/categories', categoryRoutes);
 app.use('/products', productRoutes);
 app.use('/favorites', favoriteRoutes);
 
