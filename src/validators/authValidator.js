@@ -1,3 +1,4 @@
+//soria nicolas
 const Joi = require('joi');
 
 const registerResellerSchema = Joi.object({

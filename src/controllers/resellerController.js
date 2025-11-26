@@ -1,3 +1,4 @@
+//soria nicolas
 const resellerService = require('../services/resellerService');
 
 class ResellerController {
