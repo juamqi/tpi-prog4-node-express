@@ -408,6 +408,51 @@ class FavoriteService {
 
     return Math.round(finalPrice * 100) / 100; 
   }
+  //sorianicolas
+  async getFavoriteDetail(resellerId, productId) {
+    const favoriteSnapshot = await db.collection('favorites')
+      .where('resellerId', '==', resellerId)
+      .where('productId', '==', productId)
+      .get();
+
+    if (favoriteSnapshot.empty) {
+      throw new Error('El producto no está en tus favoritos');
+    }
+
+    const favoriteDoc = favoriteSnapshot.docs[0];
+    const favoriteData = {
+      favoriteId: favoriteDoc.id,
+      ...favoriteDoc.data(),
+      addedAt: favoriteDoc.data().addedAt?.toDate()
+    };
+
+    const productDoc = await db.collection('products').doc(productId).get();
+    
+    if (!productDoc.exists) {
+      throw new Error('Producto no encontrado');
+    }
+
+    const productData = {
+      productId: productDoc.id,
+      ...productDoc.data()
+    };
+
+    const enriched = await this._enrichProductsData([productData]);
+    
+    const finalPrice = await this._calculateFinalPrice(
+      productData.price,
+      favoriteData,
+      resellerId
+    );
+
+    return {
+      ...favoriteData,
+      product: {
+        ...enriched[0],
+        finalPrice
+      }
+    };
+  }
 }
 
 module.exports = new FavoriteService();

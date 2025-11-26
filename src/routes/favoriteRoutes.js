@@ -46,4 +46,9 @@ router.delete(
   favoriteController.removeFavorite
 );
 
+router.get(
+  '/:productId',
+  favoriteController.getFavoriteDetail
+);
+
 module.exports = router;

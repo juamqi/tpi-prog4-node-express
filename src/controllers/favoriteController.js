@@ -1,3 +1,4 @@
+//sebastian panozzo
 const favoriteService = require('../services/favoriteService');
 
 class FavoriteController {
@@ -165,6 +166,33 @@ class FavoriteController {
       });
     }
   }
+  //soria nicolas
+  async getFavoriteDetail(req, res) {
+  try {
+    const resellerId = req.user.userId;
+    const productId = req.params.productId;
+
+    const result = await favoriteService.getFavoriteDetail(resellerId, productId);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    if (error.message.includes('no está en')) {
+      return res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener detalle del favorito',
+      error: error.message
+    });
+  }
+}
 }
 
 module.exports = new FavoriteController();
