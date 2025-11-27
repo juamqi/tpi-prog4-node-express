@@ -227,7 +227,8 @@
                 showResponse(result);
                 
                 if (result.success && result.data) {
-                    const userType = result.data.userType;
+                    // El userType está dentro de result.data.user
+                    const userType = result.data.user.userType;
                     const token = result.data.token;
                     const refreshToken = result.data.refreshToken;
                     
