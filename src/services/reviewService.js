@@ -19,11 +19,11 @@ class ReviewService {
     }
 
     const productData = productDoc.data();
-    supplierId = productData.supplierId;
+      const supplierId = productData.supplierId; 
 
-    if (!supplierId) {
-      throw buildError('El producto no tiene un proveedor asociado', 400);
-    }
+      if (!supplierId) {
+        throw buildError('El producto no tiene un proveedor asociado', 400); 
+      }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
     const reviewId = `${productId}_${resellerId}`;
@@ -32,13 +32,13 @@ class ReviewService {
     const data = {
       productId,
       resellerId,
-      supplierId,
+      supplierId, 
       rating,
       comment,
       likes: 0,
       createdAt: now,
-      updatedAt: now
-    };
+      updatedAt: now
+    };
 
     try {
       await docRef.create(data);
