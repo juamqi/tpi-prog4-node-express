@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación - TangoShop</title>
+</head>
+<body>
+    <h1>🔐 Autenticación (7 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    
+    <hr>
+    
+    <h2>1. POST /auth/register/reseller - Registrar Revendedor</h2>
+    <form id="register-reseller-form">
+        <p>Email: <input type="email" name="email" required></p>
+        <p>Contraseña: <input type="password" name="password" required minlength="8">
+            <small>(Min 8 caracteres, mayúsculas, minúsculas y números)</small>
+        </p>
+        <p>Nombre: <input type="text" name="firstName" required></p>
+        <p>Apellido: <input type="text" name="lastName" required></p>
+        <p>Teléfono: <input type="text" name="phone"></p>
+        <p>Sitio Web: <input type="url" name="website"></p>
+        <button type="submit">Registrar Revendedor</button>
+    </form>
+    
+    <hr>
+    
+    <h2>2. POST /auth/register/supplier - Registrar Proveedor</h2>
+    <form id="register-supplier-form">
+        <p>Email: <input type="email" name="email" required></p>
+        <p>Contraseña: <input type="password" name="password" required minlength="8">
+            <small>(Min 8 caracteres, mayúsculas, minúsculas y números)</small>
+        </p>
+        <p>Nombre de la Empresa: <input type="text" name="companyName" required></p>
+        <p>Teléfono: <input type="text" name="phone" required></p>
+        <p>Sitio Web: <input type="url" name="website"></p>
+        <fieldset>
+            <legend>Dirección</legend>
+            <p>Provincia: <input type="text" name="province" required></p>
+            <p>Ciudad: <input type="text" name="city" required></p>
+            <p>Calle: <input type="text" name="street" required></p>
+            <p>Número: <input type="text" name="number" required></p>
+        </fieldset>
+        <button type="submit">Registrar Proveedor</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. POST /auth/login - Iniciar Sesión</h2>
+    <form id="login-form">
+        <p>Email: <input type="email" name="email" required></p>
+        <p>Contraseña: <input type="password" name="password" required></p>
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+    <p><small>El token se guardará automáticamente en localStorage</small></p>
+    
+    <hr>
+    
+    <h2>4. POST /auth/logout - Cerrar Sesión</h2>
+    <p><strong>⚠️ Requiere token</strong></p>
+    <form id="logout-form">
+        <p>Tipo de usuario:
+            <select name="userType">
+                <option value="reseller">Revendedor</option>
+                <option value="supplier">Proveedor</option>
+            </select>
+        </p>
+        <button type="submit">Cerrar Sesión</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. POST /auth/refresh-token - Renovar Token</h2>
+    <form id="refresh-token-form">
+        <p>Refresh Token:
+            <input type="text" name="refreshToken" id="refresh-token-input" required>
+        </p>
+        <button type="button" onclick="loadRefreshToken()">📋 Cargar desde localStorage</button>
+        <br><br>
+        <button type="submit">Renovar Token</button>
+    </form>
+    
+    <hr>
+    
+    <h2>6. POST /auth/forgot-password - Recuperar Contraseña</h2>
+    <form id="forgot-password-form">
+        <p>Email: <input type="email" name="email" required></p>
+        <button type="submit">Enviar Email de Recuperación</button>
+    </form>
+    
+    <hr>
+    
+    <h2>7. POST /auth/reset-password - Restablecer Contraseña</h2>
+    <form id="reset-password-form">
+        <p>Token de Recuperación: <input type="text" name="token" required></p>
+        <p>Nueva Contraseña: <input type="password" name="newPassword" required minlength="8">
+            <small>(Min 8 caracteres, mayúsculas, minúsculas y números)</small>
+        </p>
+        <button type="submit">Restablecer Contraseña</button>
+    </form>
+    
+    <hr>
+    
+    <h2>📊 Estado de Tokens</h2>
+    <p><strong>Token Revendedor:</strong> <span id="reseller-token">No hay token</span></p>
+    <p><strong>Token Proveedor:</strong> <span id="supplier-token">No hay token</span></p>
+    <p><strong>Refresh Token:</strong> <span id="refresh-token-display">No hay token</span></p>
+    <button onclick="updateTokenDisplay()">🔄 Actualizar</button>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function updateTokenDisplay() {
+            const resellerToken = localStorage.getItem('RESELLER_TOKEN');
+            const supplierToken = localStorage.getItem('SUPPLIER_TOKEN');
+            const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+            
+            document.getElementById('reseller-token').textContent = 
+                resellerToken ? resellerToken.substring(0, 50) + '...' : 'No hay token';
+            document.getElementById('supplier-token').textContent = 
+                supplierToken ? supplierToken.substring(0, 50) + '...' : 'No hay token';
+            document.getElementById('refresh-token-display').textContent = 
+                refreshToken ? refreshToken.substring(0, 50) + '...' : 'No hay token';
+        }
+        
+        function loadRefreshToken() {
+            const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+            if (refreshToken) {
+                document.getElementById('refresh-token-input').value = refreshToken;
+                alert('✅ Refresh token cargado');
+            } else {
+                alert('❌ No hay refresh token guardado');
+            }
+        }
+        
+        // 1. Register Reseller
+        document.getElementById('register-reseller-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password'),
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                phone: formData.get('phone') || '',
+                website: formData.get('website') || ''
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/register/reseller`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                if (result.success) {
+                    alert('✅ Revendedor registrado exitosamente');
+                    e.target.reset();
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 2. Register Supplier
+        document.getElementById('register-supplier-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password'),
+                companyName: formData.get('companyName'),
+                phone: formData.get('phone'),
+                website: formData.get('website') || '',
+                address: {
+                    province: formData.get('province'),
+                    city: formData.get('city'),
+                    street: formData.get('street'),
+                    number: formData.get('number')
+                }
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/register/supplier`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                if (result.success) {
+                    alert('✅ Proveedor registrado exitosamente');
+                    e.target.reset();
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                
+                if (result.success && result.data) {
+                    const userType = result.data.userType;
+                    const token = result.data.token;
+                    const refreshToken = result.data.refreshToken;
+                    
+                    if (userType === 'reseller') {
+                        localStorage.setItem('RESELLER_TOKEN', token);
+                    } else if (userType === 'supplier') {
+                        localStorage.setItem('SUPPLIER_TOKEN', token);
+                    }
+                    
+                    if (refreshToken) {
+                        localStorage.setItem('REFRESH_TOKEN', refreshToken);
+                    }
+                    
+                    updateTokenDisplay();
+                    alert(`✅ Login exitoso como ${userType}`);
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 4. Logout
+        document.getElementById('logout-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userType = formData.get('userType');
+            
+            const token = userType === 'reseller' 
+                ? localStorage.getItem('RESELLER_TOKEN')
+                : localStorage.getItem('SUPPLIER_TOKEN');
+            
+            const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+            
+            if (!token) {
+                alert('❌ No hay token de ' + userType);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ refreshToken })
+                });
+                const result = await response.json();
+                showResponse(result);
+                
+                if (result.success) {
+                    if (userType === 'reseller') {
+                        localStorage.removeItem('RESELLER_TOKEN');
+                    } else {
+                        localStorage.removeItem('SUPPLIER_TOKEN');
+                    }
+                    localStorage.removeItem('REFRESH_TOKEN');
+                    updateTokenDisplay();
+                    alert('✅ Logout exitoso');
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Refresh Token
+        document.getElementById('refresh-token-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                refreshToken: formData.get('refreshToken')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/refresh-token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                
+                if (result.success && result.data) {
+                    const token = result.data.token;
+                    const userType = result.data.userType;
+                    
+                    if (userType === 'reseller') {
+                        localStorage.setItem('RESELLER_TOKEN', token);
+                    } else if (userType === 'supplier') {
+                        localStorage.setItem('SUPPLIER_TOKEN', token);
+                    }
+                    
+                    updateTokenDisplay();
+                    alert('✅ Token renovado exitosamente');
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 6. Forgot Password
+        document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                email: formData.get('email')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                if (result.success) {
+                    alert('✅ Email de recuperación enviado');
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 7. Reset Password
+        document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                token: formData.get('token'),
+                newPassword: formData.get('newPassword')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                if (result.success) {
+                    alert('✅ Contraseña restablecida exitosamente');
+                    e.target.reset();
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        updateTokenDisplay();
+    </script>
+</body>
+</html>

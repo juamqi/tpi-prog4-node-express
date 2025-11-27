@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const { db } = require('./config/firebase');
@@ -20,15 +21,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Servir archivos estáticos de la carpeta views
+app.use(express.static(path.join(__dirname, 'views')));
+
 app.get('/', (req, res) => {
-  res.json({
-    message: 'TangoShop API funcion',
-    status: 'online',
-    version: '1.0.0',
-    resellers: '/resellers',
-    products: '/products',
-    favorites: '/favorites'
-  });
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.use('/auth', authRoutes);
@@ -47,7 +44,6 @@ app.use((req, res) => {
     message: 'Endpoint no encontrado'
   });
 });
-
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

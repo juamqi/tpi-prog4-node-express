@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TangoShop API - Probador de Endpoints</title>
+</head>
+<body>
+    <h1>🛍️ TangoShop API - Probador de Endpoints</h1>
+    <p>Bienvenido al sistema de pruebas de la API de TangoShop</p>
+    
+    <hr>
+    
+    <h2>📋 Módulos Disponibles</h2>
+    
+    <h3>🔐 Autenticación (7 endpoints)</h3>
+    <ul>
+        <li><a href="auth.html">Ir a Autenticación</a></li>
+        <li>Registro de Revendedores</li>
+        <li>Registro de Proveedores</li>
+        <li>Login</li>
+        <li>Logout</li>
+        <li>Refresh Token</li>
+        <li>Recuperar Contraseña</li>
+        <li>Restablecer Contraseña</li>
+    </ul>
+    
+    <h3>📦 Categorías (5 endpoints)</h3>
+    <ul>
+        <li><a href="category.html">Ir a Categorías</a></li>
+        <li>Listar Categorías</li>
+        <li>Categorías Populares</li>
+        <li>Obtener Categoría por ID</li>
+        <li>Productos de una Categoría</li>
+        <li>Proveedores de una Categoría</li>
+    </ul>
+    
+    <h3>⭐ Favoritos (7 endpoints)</h3>
+    <ul>
+        <li><a href="favorite.html">Ir a Favoritos</a></li>
+        <li>Agregar Favorito</li>
+        <li>Listar Favoritos</li>
+        <li>Favoritos por Categoría</li>
+        <li>Obtener Markup de Producto</li>
+        <li>Configurar Markup</li>
+        <li>Detalle de Favorito</li>
+        <li>Eliminar Favorito</li>
+    </ul>
+    
+    <h3>🔔 Notificaciones (3 endpoints)</h3>
+    <ul>
+        <li><a href="notification.html">Ir a Notificaciones</a></li>
+        <li>Obtener Notificaciones</li>
+        <li>Marcar como Leída</li>
+        <li>Eliminar Notificación</li>
+    </ul>
+    
+    <h3>📦 Productos (11 endpoints)</h3>
+    <ul>
+        <li><a href="product.html">Ir a Productos</a></li>
+        <li>Listar Productos</li>
+        <li>Buscar Productos</li>
+        <li>Productos Mejor Valorados</li>
+        <li>Productos Recientes</li>
+        <li>Productos por Proveedor</li>
+        <li>Productos Relacionados</li>
+        <li>Obtener Producto por ID</li>
+        <li>Crear Producto</li>
+        <li>Actualizar Producto</li>
+        <li>Actualizar Foto de Producto</li>
+        <li>Eliminar Producto</li>
+    </ul>
+    
+    <h3>👤 Revendedores (7 endpoints)</h3>
+    <ul>
+        <li><a href="reseller.html">Ir a Revendedores</a></li>
+        <li>Ver Perfil</li>
+        <li>Actualizar Perfil</li>
+        <li>Actualizar Foto</li>
+        <li>Listar Revendedores</li>
+        <li>Obtener Revendedor por ID</li>
+        <li>Desactivar Cuenta</li>
+        <li>Estadísticas Detalladas</li>
+    </ul>
+    
+    <h3>⭐ Reseñas (7 endpoints)</h3>
+    <ul>
+        <li><a href="review.html">Ir a Reseñas</a></li>
+        <li>Crear Reseña</li>
+        <li>Reseñas de un Producto</li>
+        <li>Mis Reseñas</li>
+        <li>Dar Like a Reseña</li>
+        <li>Obtener Reseña por ID</li>
+        <li>Actualizar Reseña</li>
+        <li>Eliminar Reseña</li>
+    </ul>
+    
+    <h3>🔍 Búsquedas (5 endpoints)</h3>
+    <ul>
+        <li><a href="search.html">Ir a Búsquedas</a></li>
+        <li>Búsqueda Avanzada</li>
+        <li>Obtener Filtros</li>
+        <li>Productos Relacionados</li>
+        <li>Productos por Proveedor</li>
+        <li>Proveedores Favoritos</li>
+    </ul>
+    
+    <h3>🏢 Proveedores (10 endpoints)</h3>
+    <ul>
+        <li><a href="supplier.html">Ir a Proveedores</a></li>
+        <li>Ver Perfil</li>
+        <li>Actualizar Perfil</li>
+        <li>Actualizar Foto</li>
+        <li>Listar Proveedores</li>
+        <li>Favoritos de un Producto</li>
+        <li>Obtener Proveedor por ID</li>
+        <li>Productos del Proveedor</li>
+        <li>Estadísticas del Proveedor</li>
+        <li>Reseñas del Proveedor</li>
+        <li>Revendedores del Proveedor</li>
+    </ul>
+    
+    <hr>
+    
+    <h2>📝 Información de Tokens</h2>
+    <p><strong>Token de Revendedor almacenado:</strong> <span id="reseller-token-status">No hay token</span></p>
+    <p><strong>Token de Proveedor almacenado:</strong> <span id="supplier-token-status">No hay token</span></p>
+    
+    <button onclick="clearTokens()">🗑️ Limpiar Tokens</button>
+    
+    <hr>
+    
+    <h2>🌐 Configuración</h2>
+    <p><strong>URL Base:</strong> http://localhost:3000</p>
+    <p><strong>Estado de la API:</strong> <span id="api-status">Verificando...</span></p>
+    <button onclick="checkAPIStatus()">🔄 Verificar Estado</button>
+    
+    <hr>
+    
+    <h2>📊 Total de Endpoints: 62</h2>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function updateTokenStatus() {
+            const resellerToken = localStorage.getItem('RESELLER_TOKEN');
+            const supplierToken = localStorage.getItem('SUPPLIER_TOKEN');
+            
+            document.getElementById('reseller-token-status').textContent = 
+                resellerToken ? '✅ Token presente' : '❌ No hay token';
+            document.getElementById('supplier-token-status').textContent = 
+                supplierToken ? '✅ Token presente' : '❌ No hay token';
+        }
+        
+        function clearTokens() {
+            if (confirm('¿Estás seguro de que quieres limpiar todos los tokens?')) {
+                localStorage.removeItem('RESELLER_TOKEN');
+                localStorage.removeItem('SUPPLIER_TOKEN');
+                localStorage.removeItem('REFRESH_TOKEN');
+                updateTokenStatus();
+                alert('✅ Tokens limpiados exitosamente');
+            }
+        }
+        
+        async function checkAPIStatus() {
+            document.getElementById('api-status').textContent = 'Verificando...';
+            try {
+                const response = await fetch(`${BASE_URL}/`);
+                const data = await response.json();
+                document.getElementById('api-status').textContent = 
+                    `✅ ${data.status} - v${data.version}`;
+            } catch (error) {
+                document.getElementById('api-status').textContent = 
+                    '❌ Error: ' + error.message;
+            }
+        }
+        
+        updateTokenStatus();
+        checkAPIStatus();
+    </script>
+</body>
+</html>

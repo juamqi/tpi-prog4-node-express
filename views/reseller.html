@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revendedores - TangoShop</title>
+</head>
+<body>
+    <h1>👤 Revendedores (7 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    
+    <hr>
+    
+    <h2>1. GET /resellers/profile - Ver Mi Perfil</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <button onclick="getMyProfile()">Ver Mi Perfil</button>
+    
+    <hr>
+    
+    <h2>2. PUT /resellers/profile - Actualizar Perfil</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <form id="update-profile-form">
+        <p>Nombre: <input type="text" name="firstName"></p>
+        <p>Apellido: <input type="text" name="lastName"></p>
+        <p>Teléfono: <input type="text" name="phone"></p>
+        <p>Sitio Web: <input type="url" name="website"></p>
+        <button type="submit">Actualizar Perfil</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. PUT /resellers/profile/photo - Actualizar Foto</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <form id="update-photo-form">
+        <p>URL de Foto: <input type="url" name="photoURL" required></p>
+        <button type="submit">Actualizar Foto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>4. GET /resellers - Listar Revendedores</h2>
+    <form id="list-resellers-form">
+        <p>Página: <input type="number" name="page" value="1" min="1"></p>
+        <p>Límite: <input type="number" name="limit" value="10" min="1" max="50"></p>
+        <button type="submit">Listar Revendedores</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. GET /resellers/:id - Obtener Revendedor por ID</h2>
+    <form id="get-reseller-form">
+        <p>
+            Reseller ID: 
+            <input type="text" name="resellerId" id="reseller-id-input" required>
+        </p>
+        <p>
+            <select id="reseller-select" onchange="selectReseller()">
+                <option value="">-- Seleccione un revendedor --</option>
+            </select>
+            <button type="button" onclick="loadResellers()">🔄 Cargar Revendedores</button>
+        </p>
+        <button type="submit">Obtener Revendedor</button>
+    </form>
+    
+    <hr>
+    
+    <h2>6. PUT /resellers/account/deactivate - Desactivar Cuenta</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>⚠️ Esta acción es permanente</strong></p>
+    <button onclick="deactivateAccount()">Desactivar Mi Cuenta</button>
+    
+    <hr>
+    
+    <h2>7. GET /resellers/profile/stats - Estadísticas Detalladas</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <button onclick="getDetailedStats()">Ver Mis Estadísticas</button>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function getResellerToken() {
+            const token = localStorage.getItem('RESELLER_TOKEN');
+            if (!token) {
+                alert('⚠️ Se requiere un token de Reseller');
+                return null;
+            }
+            return token;
+        }
+        
+        async function loadResellers() {
+            try {
+                const response = await fetch(`${BASE_URL}/resellers?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById('reseller-select');
+                    select.innerHTML = '<option value="">-- Seleccione un revendedor --</option>';
+                    result.data.forEach(reseller => {
+                        const option = document.createElement('option');
+                        option.value = reseller.resellerId;
+                        option.textContent = `${reseller.firstName} ${reseller.lastName}`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Revendedores cargados');
+                }
+            } catch (error) {
+                alert('Error al cargar revendedores: ' + error.message);
+            }
+        }
+        
+        function selectReseller() {
+            const select = document.getElementById('reseller-select');
+            const input = document.getElementById('reseller-id-input');
+            input.value = select.value;
+        }
+        
+        // 1. Get My Profile
+        async function getMyProfile() {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+        
+        // 2. Update Profile
+        document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            ['firstName', 'lastName', 'phone', 'website'].forEach(key => {
+                const value = formData.get(key);
+                if (value) data[key] = value;
+            });
+            
+            if (Object.keys(data).length === 0) {
+                alert('Debes proporcionar al menos un campo para actualizar');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Update Photo
+        document.getElementById('update-photo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const data = {
+                photoURL: formData.get('photoURL')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers/profile/photo`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 4. List Resellers
+        document.getElementById('list-resellers-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({
+                page: formData.get('page'),
+                limit: formData.get('limit')
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Get Reseller by ID
+        document.getElementById('get-reseller-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const resellerId = formData.get('resellerId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers/${resellerId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 6. Deactivate Account
+        async function deactivateAccount() {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            if (!confirm('⚠️ ¿Estás seguro de que quieres desactivar tu cuenta? Esta acción es permanente.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers/account/deactivate`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+                
+                if (result.success) {
+                    alert('Cuenta desactivada. Se cerrará tu sesión.');
+                    localStorage.removeItem('RESELLER_TOKEN');
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+        
+        // 7. Get Detailed Stats
+        async function getDetailedStats() {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/resellers/profile/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+    </script>
+</body>
+</html>

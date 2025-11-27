@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reseñas - TangoShop</title>
+</head>
+<body>
+    <h1>⭐ Reseñas (7 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    
+    <hr>
+    
+    <h2>1. POST /reviews - Crear Reseña</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <form id="create-review-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="create-review-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-review" onchange="selectProductForReview()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForReview()">🔄 Cargar Productos</button>
+        </p>
+        <p>Rating: 
+            <select name="rating" required>
+                <option value="">-- Seleccione --</option>
+                <option value="1">⭐ 1</option>
+                <option value="2">⭐⭐ 2</option>
+                <option value="3">⭐⭐⭐ 3</option>
+                <option value="4">⭐⭐⭐⭐ 4</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5</option>
+            </select>
+        </p>
+        <p>Comentario (min 10 caracteres): <textarea name="comment" required minlength="10" maxlength="500"></textarea></p>
+        <button type="submit">Crear Reseña</button>
+    </form>
+    
+    <hr>
+    
+    <h2>2. GET /reviews/product/:productId - Reseñas de un Producto</h2>
+    <form id="product-reviews-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="product-reviews-id" required>
+        </p>
+        <p>
+            <select id="product-select-reviews" onchange="selectProductForReviews()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForReviews()">🔄 Cargar Productos</button>
+        </p>
+        <button type="submit">Ver Reseñas</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. GET /reviews/user/me - Mis Reseñas</h2>
+    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <button onclick="getMyReviews()">Ver Mis Reseñas</button>
+    
+    <hr>
+    
+    <h2>4. POST /reviews/:id/like - Dar Like a Reseña</h2>
+    <p><strong>⚠️ Requiere token</strong></p>
+    <form id="like-review-form">
+        <p>
+            Review ID: 
+            <input type="text" name="reviewId" id="like-review-id" required>
+        </p>
+        <p>
+            <select id="review-select-like" onchange="selectReviewForLike()">
+                <option value="">-- Seleccione una reseña --</option>
+            </select>
+            <button type="button" onclick="loadReviewsForLike()">🔄 Cargar Reseñas</button>
+        </p>
+        <p>Tipo de usuario:
+            <select name="userType" required>
+                <option value="reseller">Revendedor</option>
+                <option value="supplier">Proveedor</option>
+            </select>
+        </p>
+        <button type="submit">Dar Like</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. GET /reviews/:id - Obtener Reseña por ID</h2>
+    <form id="get-review-form">
+        <p>
+            Review ID: 
+            <input type="text" name="reviewId" id="get-review-id" required>
+        </p>
+        <p>
+            <select id="review-select-get" onchange="selectReviewForGet()">
+                <option value="">-- Seleccione una reseña --</option>
+            </select>
+            <button type="button" onclick="loadReviewsForGet()">🔄 Cargar Reseñas</button>
+        </p>
+        <button type="submit">Obtener Reseña</button>
+    </form>
+    
+    <hr>
+    
+    <h2>6. PUT /reviews/:id - Actualizar Reseña</h2>
+    <p><strong>⚠️ Requiere token de Reseller (solo puedes actualizar tus reseñas)</strong></p>
+    <form id="update-review-form">
+        <p>
+            Review ID: 
+            <input type="text" name="reviewId" id="update-review-id" required>
+        </p>
+        <p>
+            <select id="my-review-select-update" onchange="selectMyReviewForUpdate()">
+                <option value="">-- Seleccione tu reseña --</option>
+            </select>
+            <button type="button" onclick="loadMyReviewsForUpdate()">🔄 Cargar Mis Reseñas</button>
+        </p>
+        <p>Rating: 
+            <select name="rating">
+                <option value="">-- Sin cambios --</option>
+                <option value="1">⭐ 1</option>
+                <option value="2">⭐⭐ 2</option>
+                <option value="3">⭐⭐⭐ 3</option>
+                <option value="4">⭐⭐⭐⭐ 4</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5</option>
+            </select>
+        </p>
+        <p>Comentario (min 10 caracteres): <textarea name="comment" minlength="10" maxlength="500"></textarea></p>
+        <button type="submit">Actualizar Reseña</button>
+    </form>
+    
+    <hr>
+    
+    <h2>7. DELETE /reviews/:id - Eliminar Reseña</h2>
+    <p><strong>⚠️ Requiere token de Reseller (solo puedes eliminar tus reseñas)</strong></p>
+    <form id="delete-review-form">
+        <p>
+            Review ID: 
+            <input type="text" name="reviewId" id="delete-review-id" required>
+        </p>
+        <p>
+            <select id="my-review-select-delete" onchange="selectMyReviewForDelete()">
+                <option value="">-- Seleccione tu reseña --</option>
+            </select>
+            <button type="button" onclick="loadMyReviewsForDelete()">🔄 Cargar Mis Reseñas</button>
+        </p>
+        <button type="submit">Eliminar Reseña</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function getResellerToken() {
+            const token = localStorage.getItem('RESELLER_TOKEN');
+            if (!token) {
+                alert('⚠️ Se requiere un token de Reseller');
+                return null;
+            }
+            return token;
+        }
+        
+        function getToken(userType) {
+            const token = userType === 'reseller' 
+                ? localStorage.getItem('RESELLER_TOKEN')
+                : localStorage.getItem('SUPPLIER_TOKEN');
+            
+            if (!token) {
+                alert(`⚠️ Se requiere un token de ${userType}`);
+                return null;
+            }
+            return token;
+        }
+        
+        async function loadProducts(selectId) {
+            try {
+                const response = await fetch(`${BASE_URL}/products?limit=100`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+                    result.data.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.productId;
+                        option.textContent = `${product.name} - $${product.price}`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Productos cargados');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadProductsForReview() { loadProducts('product-select-review'); }
+        function selectProductForReview() {
+            document.getElementById('create-review-product-id').value = document.getElementById('product-select-review').value;
+        }
+        
+        function loadProductsForReviews() { loadProducts('product-select-reviews'); }
+        function selectProductForReviews() {
+            document.getElementById('product-reviews-id').value = document.getElementById('product-select-reviews').value;
+        }
+        
+        async function loadReviews(selectId, productId = null) {
+            try {
+                let url = `${BASE_URL}/products?limit=10`;
+                if (productId) {
+                    url = `${BASE_URL}/reviews/product/${productId}`;
+                } else {
+                    const productsResp = await fetch(`${BASE_URL}/products?limit=10`);
+                    const productsResult = await productsResp.json();
+                    if (productsResult.success && productsResult.data.length > 0) {
+                        productId = productsResult.data[0].productId;
+                        url = `${BASE_URL}/reviews/product/${productId}`;
+                    }
+                }
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione una reseña --</option>';
+                    result.data.forEach(review => {
+                        const option = document.createElement('option');
+                        option.value = review.reviewId;
+                        option.textContent = `★${review.rating} - ${review.comment.substring(0, 40)}...`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Reseñas cargadas');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadReviewsForLike() { loadReviews('review-select-like'); }
+        function selectReviewForLike() {
+            document.getElementById('like-review-id').value = document.getElementById('review-select-like').value;
+        }
+        
+        function loadReviewsForGet() { loadReviews('review-select-get'); }
+        function selectReviewForGet() {
+            document.getElementById('get-review-id').value = document.getElementById('review-select-get').value;
+        }
+        
+        async function loadMyReviews(selectId) {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/user/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione tu reseña --</option>';
+                    result.data.forEach(review => {
+                        const option = document.createElement('option');
+                        option.value = review.reviewId;
+                        option.textContent = `★${review.rating} - ${review.comment.substring(0, 40)}...`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Tus reseñas cargadas');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadMyReviewsForUpdate() { loadMyReviews('my-review-select-update'); }
+        function selectMyReviewForUpdate() {
+            document.getElementById('update-review-id').value = document.getElementById('my-review-select-update').value;
+        }
+        
+        function loadMyReviewsForDelete() { loadMyReviews('my-review-select-delete'); }
+        function selectMyReviewForDelete() {
+            document.getElementById('delete-review-id').value = document.getElementById('my-review-select-delete').value;
+        }
+        
+        // 1. Create Review
+        document.getElementById('create-review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const data = {
+                productId: formData.get('productId'),
+                rating: parseInt(formData.get('rating')),
+                comment: formData.get('comment')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+                if (result.success) {
+                    alert('✅ Reseña creada');
+                    e.target.reset();
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 2. Get Product Reviews
+        document.getElementById('product-reviews-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/product/${productId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Get My Reviews
+        async function getMyReviews() {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/user/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+        
+        // 4. Like Review
+        document.getElementById('like-review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const reviewId = formData.get('reviewId');
+            const userType = formData.get('userType');
+            const token = getToken(userType);
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/${reviewId}/like`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Get Review by ID
+        document.getElementById('get-review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const reviewId = formData.get('reviewId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/${reviewId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 6. Update Review
+        document.getElementById('update-review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const reviewId = formData.get('reviewId');
+            
+            const data = {};
+            if (formData.get('rating')) data.rating = parseInt(formData.get('rating'));
+            if (formData.get('comment')) data.comment = formData.get('comment');
+            
+            if (Object.keys(data).length === 0) {
+                alert('Debes proporcionar al menos un campo para actualizar');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 7. Delete Review
+        document.getElementById('delete-review-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            if (!confirm('¿Estás seguro de eliminar esta reseña?')) return;
+            
+            const formData = new FormData(e.target);
+            const reviewId = formData.get('reviewId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/reviews/${reviewId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.status === 204) {
+                    showResponse({ success: true, message: 'Reseña eliminada (204 No Content)' });
+                } else {
+                    const result = await response.json();
+                    showResponse(result);
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+    </script>
+</body>
+</html>

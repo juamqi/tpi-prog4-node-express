@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categorías - TangoShop</title>
+</head>
+<body>
+    <h1>📦 Categorías (5 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    
+    <hr>
+    
+    <h2>1. GET /categories - Listar Categorías</h2>
+    <form id="list-categories-form">
+        <p>Página: <input type="number" name="page" value="1" min="1"></p>
+        <p>Límite: <input type="number" name="limit" value="10" min="1" max="100"></p>
+        <button type="submit">Listar Categorías</button>
+    </form>
+    
+    <hr>
+    
+    <h2>2. GET /categories/popular - Categorías Populares</h2>
+    <form id="popular-categories-form">
+        <p>Límite: <input type="number" name="limit" value="10" min="1" max="20"></p>
+        <button type="submit">Ver Categorías Populares</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. GET /categories/:id - Obtener Categoría por ID</h2>
+    <form id="get-category-form">
+        <p>
+            Category ID: 
+            <input type="text" name="categoryId" id="category-id-input" required>
+        </p>
+        <p>
+            <select id="category-select" onchange="selectCategory()">
+                <option value="">-- Seleccione una categoría --</option>
+            </select>
+            <button type="button" onclick="loadCategories()">🔄 Cargar Categorías</button>
+        </p>
+        <button type="submit">Obtener Categoría</button>
+    </form>
+    
+    <hr>
+    
+    <h2>4. GET /categories/:id/products - Productos de una Categoría</h2>
+    <form id="category-products-form">
+        <p>
+            Category ID: 
+            <input type="text" name="categoryId" id="category-products-id" required>
+        </p>
+        <p>
+            <select id="category-select-products" onchange="selectCategoryForProducts()">
+                <option value="">-- Seleccione una categoría --</option>
+            </select>
+            <button type="button" onclick="loadCategoriesForProducts()">🔄 Cargar Categorías</button>
+        </p>
+        <button type="submit">Ver Productos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. GET /categories/:id/suppliers - Proveedores de una Categoría</h2>
+    <form id="category-suppliers-form">
+        <p>
+            Category ID: 
+            <input type="text" name="categoryId" id="category-suppliers-id" required>
+        </p>
+        <p>
+            <select id="category-select-suppliers" onchange="selectCategoryForSuppliers()">
+                <option value="">-- Seleccione una categoría --</option>
+            </select>
+            <button type="button" onclick="loadCategoriesForSuppliers()">🔄 Cargar Categorías</button>
+        </p>
+        <button type="submit">Ver Proveedores</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${BASE_URL}/categories?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById('category-select');
+                    select.innerHTML = '<option value="">-- Seleccione una categoría --</option>';
+                    result.data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.categoryId;
+                        option.textContent = category.name;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Categorías cargadas');
+                }
+            } catch (error) {
+                alert('Error al cargar categorías: ' + error.message);
+            }
+        }
+        
+        function selectCategory() {
+            const select = document.getElementById('category-select');
+            const input = document.getElementById('category-id-input');
+            input.value = select.value;
+        }
+        
+        async function loadCategoriesForProducts() {
+            try {
+                const response = await fetch(`${BASE_URL}/categories?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById('category-select-products');
+                    select.innerHTML = '<option value="">-- Seleccione una categoría --</option>';
+                    result.data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.categoryId;
+                        option.textContent = category.name;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Categorías cargadas');
+                }
+            } catch (error) {
+                alert('Error al cargar categorías: ' + error.message);
+            }
+        }
+        
+        function selectCategoryForProducts() {
+            const select = document.getElementById('category-select-products');
+            const input = document.getElementById('category-products-id');
+            input.value = select.value;
+        }
+        
+        async function loadCategoriesForSuppliers() {
+            try {
+                const response = await fetch(`${BASE_URL}/categories?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById('category-select-suppliers');
+                    select.innerHTML = '<option value="">-- Seleccione una categoría --</option>';
+                    result.data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.categoryId;
+                        option.textContent = category.name;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Categorías cargadas');
+                }
+            } catch (error) {
+                alert('Error al cargar categorías: ' + error.message);
+            }
+        }
+        
+        function selectCategoryForSuppliers() {
+            const select = document.getElementById('category-select-suppliers');
+            const input = document.getElementById('category-suppliers-id');
+            input.value = select.value;
+        }
+        
+        // 1. List Categories
+        document.getElementById('list-categories-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({
+                page: formData.get('page'),
+                limit: formData.get('limit')
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/categories?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 2. Popular Categories
+        document.getElementById('popular-categories-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({
+                limit: formData.get('limit')
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/categories/popular?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Get Category by ID
+        document.getElementById('get-category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const categoryId = formData.get('categoryId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/categories/${categoryId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 4. Category Products
+        document.getElementById('category-products-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const categoryId = formData.get('categoryId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/categories/${categoryId}/products`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Category Suppliers
+        document.getElementById('category-suppliers-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const categoryId = formData.get('categoryId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/categories/${categoryId}/suppliers`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+    </script>
+</body>
+</html>

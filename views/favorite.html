@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favoritos - TangoShop</title>
+</head>
+<body>
+    <h1>⭐ Favoritos (7 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    <p><strong>⚠️ Todos los endpoints requieren token de Reseller</strong></p>
+    
+    <hr>
+    
+    <h2>1. POST /favorites - Agregar Favorito</h2>
+    <form id="add-favorite-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="add-favorite-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-add" onchange="selectProductForAdd()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForAdd()">🔄 Cargar Productos</button>
+        </p>
+        <button type="submit">Agregar a Favoritos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>2. GET /favorites - Listar Favoritos</h2>
+    <form id="list-favorites-form">
+        <p>Página: <input type="number" name="page" value="1" min="1"></p>
+        <p>Límite: <input type="number" name="limit" value="10" min="1" max="100"></p>
+        <button type="submit">Listar Favoritos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. GET /favorites/by-category - Favoritos por Categoría</h2>
+    <button onclick="getFavoritesByCategory()">Ver Favoritos por Categoría</button>
+    
+    <hr>
+    
+    <h2>4. GET /favorites/:productId/markup - Obtener Markup de Producto</h2>
+    <form id="get-markup-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="get-markup-product-id" required>
+        </p>
+        <p>
+            <select id="favorite-select-markup" onchange="selectFavoriteForMarkup()">
+                <option value="">-- Seleccione un favorito --</option>
+            </select>
+            <button type="button" onclick="loadFavoritesForMarkup()">🔄 Cargar Favoritos</button>
+        </p>
+        <button type="submit">Ver Markup</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. PUT /favorites/:productId/markup - Configurar Markup</h2>
+    <form id="set-markup-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="set-markup-product-id" required>
+        </p>
+        <p>
+            <select id="favorite-select-set-markup" onchange="selectFavoriteForSetMarkup()">
+                <option value="">-- Seleccione un favorito --</option>
+            </select>
+            <button type="button" onclick="loadFavoritesForSetMarkup()">🔄 Cargar Favoritos</button>
+        </p>
+        <p>Tipo de Markup:
+            <select name="markupType" id="markup-type" required onchange="toggleMarkupValue()">
+                <option value="">-- Seleccione --</option>
+                <option value="fixed">Fijo ($)</option>
+                <option value="percentage">Porcentaje (%)</option>
+                <option value="default">Usar markup por defecto</option>
+            </select>
+        </p>
+        <p id="markup-value-field" style="display:none;">
+            Valor de Markup: <input type="number" name="markupValue" id="markup-value" step="0.01" min="0">
+        </p>
+        <button type="submit">Configurar Markup</button>
+    </form>
+    
+    <hr>
+    
+    <h2>6. GET /favorites/:productId - Detalle de Favorito</h2>
+    <form id="get-favorite-detail-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="favorite-detail-product-id" required>
+        </p>
+        <p>
+            <select id="favorite-select-detail" onchange="selectFavoriteForDetail()">
+                <option value="">-- Seleccione un favorito --</option>
+            </select>
+            <button type="button" onclick="loadFavoritesForDetail()">🔄 Cargar Favoritos</button>
+        </p>
+        <button type="submit">Ver Detalle</button>
+    </form>
+    
+    <hr>
+    
+    <h2>7. DELETE /favorites/:productId - Eliminar Favorito</h2>
+    <form id="remove-favorite-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="remove-favorite-product-id" required>
+        </p>
+        <p>
+            <select id="favorite-select-remove" onchange="selectFavoriteForRemove()">
+                <option value="">-- Seleccione un favorito --</option>
+            </select>
+            <button type="button" onclick="loadFavoritesForRemove()">🔄 Cargar Favoritos</button>
+        </p>
+        <button type="submit">Eliminar de Favoritos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function getResellerToken() {
+            const token = localStorage.getItem('RESELLER_TOKEN');
+            if (!token) {
+                alert('⚠️ Se requiere un token de Reseller. Por favor, inicia sesión primero.');
+                return null;
+            }
+            return token;
+        }
+        
+        function toggleMarkupValue() {
+            const markupType = document.getElementById('markup-type').value;
+            const markupValueField = document.getElementById('markup-value-field');
+            const markupValueInput = document.getElementById('markup-value');
+            
+            if (markupType === 'default') {
+                markupValueField.style.display = 'none';
+                markupValueInput.removeAttribute('required');
+            } else if (markupType) {
+                markupValueField.style.display = 'block';
+                markupValueInput.setAttribute('required', 'required');
+            } else {
+                markupValueField.style.display = 'none';
+                markupValueInput.removeAttribute('required');
+            }
+        }
+        
+        async function loadProductsForAdd() {
+            try {
+                const response = await fetch(`${BASE_URL}/products?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById('product-select-add');
+                    select.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+                    result.data.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.productId;
+                        option.textContent = `${product.name} - $${product.price}`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Productos cargados');
+                }
+            } catch (error) {
+                alert('Error al cargar productos: ' + error.message);
+            }
+        }
+        
+        function selectProductForAdd() {
+            const select = document.getElementById('product-select-add');
+            const input = document.getElementById('add-favorite-product-id');
+            input.value = select.value;
+        }
+        
+        async function loadFavorites(selectId, inputId) {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites?limit=100`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione un favorito --</option>';
+                    result.data.forEach(fav => {
+                        const option = document.createElement('option');
+                        option.value = fav.productId;
+                        option.textContent = `${fav.product?.name || 'Producto'} - $${fav.product?.price || 0}`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Favoritos cargados');
+                }
+            } catch (error) {
+                alert('Error al cargar favoritos: ' + error.message);
+            }
+        }
+        
+        function loadFavoritesForMarkup() { loadFavorites('favorite-select-markup', 'get-markup-product-id'); }
+        function selectFavoriteForMarkup() {
+            document.getElementById('get-markup-product-id').value = document.getElementById('favorite-select-markup').value;
+        }
+        
+        function loadFavoritesForSetMarkup() { loadFavorites('favorite-select-set-markup', 'set-markup-product-id'); }
+        function selectFavoriteForSetMarkup() {
+            document.getElementById('set-markup-product-id').value = document.getElementById('favorite-select-set-markup').value;
+        }
+        
+        function loadFavoritesForDetail() { loadFavorites('favorite-select-detail', 'favorite-detail-product-id'); }
+        function selectFavoriteForDetail() {
+            document.getElementById('favorite-detail-product-id').value = document.getElementById('favorite-select-detail').value;
+        }
+        
+        function loadFavoritesForRemove() { loadFavorites('favorite-select-remove', 'remove-favorite-product-id'); }
+        function selectFavoriteForRemove() {
+            document.getElementById('remove-favorite-product-id').value = document.getElementById('favorite-select-remove').value;
+        }
+        
+        // 1. Add Favorite
+        document.getElementById('add-favorite-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const data = {
+                productId: formData.get('productId')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 2. List Favorites
+        document.getElementById('list-favorites-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({
+                page: formData.get('page'),
+                limit: formData.get('limit')
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites?${params}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Favorites by Category
+        async function getFavoritesByCategory() {
+            const token = getResellerToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites/by-category`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+        
+        // 4. Get Markup
+        document.getElementById('get-markup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites/${productId}/markup`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Set Markup
+        document.getElementById('set-markup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            const markupType = formData.get('markupType');
+            
+            const data = {
+                markupType: markupType
+            };
+            
+            if (markupType !== 'default') {
+                data.markupValue = parseFloat(formData.get('markupValue'));
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites/${productId}/markup`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 6. Get Favorite Detail
+        document.getElementById('get-favorite-detail-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites/${productId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 7. Remove Favorite
+        document.getElementById('remove-favorite-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getResellerToken();
+            if (!token) return;
+            
+            if (!confirm('¿Estás seguro de eliminar este producto de favoritos?')) {
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/favorites/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+    </script>
+</body>
+</html>

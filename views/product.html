@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - TangoShop</title>
+</head>
+<body>
+    <h1>📦 Productos (11 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    
+    <hr>
+    
+    <h2>1. GET /products - Listar Productos</h2>
+    <form id="list-products-form">
+        <p>Nombre: <input type="text" name="name"></p>
+        <p>Category ID: <input type="text" name="categoryId"></p>
+        <p>Supplier ID: <input type="text" name="supplierId"></p>
+        <p>Precio Mínimo: <input type="number" name="minPrice" step="0.01"></p>
+        <p>Precio Máximo: <input type="number" name="maxPrice" step="0.01"></p>
+        <p>Rating Mínimo: <input type="number" name="minRating" step="0.1" min="0" max="5"></p>
+        <p>Página: <input type="number" name="page" value="1" min="1"></p>
+        <p>Límite: <input type="number" name="limit" value="10" min="1" max="100"></p>
+        <button type="submit">Listar Productos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>2. GET /products/search - Buscar Productos</h2>
+    <form id="search-products-form">
+        <p>Nombre: <input type="text" name="name" required></p>
+        <p>Límite: <input type="number" name="limit" value="20" min="1"></p>
+        <button type="submit">Buscar</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. GET /products/top-rated - Productos Mejor Valorados</h2>
+    <form id="top-rated-form">
+        <p>Límite: <input type="number" name="limit" value="10" min="1"></p>
+        <button type="submit">Ver Top Productos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>4. GET /products/recent - Productos Recientes</h2>
+    <form id="recent-products-form">
+        <p>Límite: <input type="number" name="limit" value="10" min="1"></p>
+        <button type="submit">Ver Productos Recientes</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. GET /products/by-supplier/:supplierId - Productos por Proveedor</h2>
+    <form id="products-by-supplier-form">
+        <p>
+            Supplier ID: 
+            <input type="text" name="supplierId" id="supplier-id-products" required>
+        </p>
+        <p>
+            <select id="supplier-select-products" onchange="selectSupplierForProducts()">
+                <option value="">-- Seleccione un proveedor --</option>
+            </select>
+            <button type="button" onclick="loadSuppliersForProducts()">🔄 Cargar Proveedores</button>
+        </p>
+        <button type="submit">Ver Productos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>6. GET /products/:id/related - Productos Relacionados</h2>
+    <form id="related-products-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="related-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-related" onchange="selectProductForRelated()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForRelated()">🔄 Cargar Productos</button>
+        </p>
+        <button type="submit">Ver Relacionados</button>
+    </form>
+    
+    <hr>
+    
+    <h2>7. GET /products/:id - Obtener Producto por ID</h2>
+    <form id="get-product-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="get-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-get" onchange="selectProductForGet()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForGet()">🔄 Cargar Productos</button>
+        </p>
+        <button type="submit">Obtener Producto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>8. POST /products - Crear Producto</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="create-product-form">
+        <p>Nombre: <input type="text" name="name" required></p>
+        <p>Descripción: <textarea name="description"></textarea></p>
+        <p>Precio: <input type="number" name="price" step="0.01" required></p>
+        <p>
+            Categoría:
+            <select name="categoryId" id="category-create" required>
+                <option value="">-- Seleccione --</option>
+            </select>
+            <button type="button" onclick="loadCategoriesForCreate()">🔄 Cargar</button>
+        </p>
+        <p>Foto (opcional): <input type="file" name="photo" accept="image/*"></p>
+        <button type="submit">Crear Producto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>9. PUT /products/:id - Actualizar Producto</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="update-product-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="update-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-update" onchange="selectProductForUpdate()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForUpdate()">🔄 Cargar Mis Productos</button>
+        </p>
+        <p>Nombre: <input type="text" name="name"></p>
+        <p>Descripción: <textarea name="description"></textarea></p>
+        <p>Precio: <input type="number" name="price" step="0.01"></p>
+        <p>
+            Categoría:
+            <select name="categoryId" id="category-update">
+                <option value="">-- Sin cambios --</option>
+            </select>
+            <button type="button" onclick="loadCategoriesForUpdate()">🔄 Cargar</button>
+        </p>
+        <button type="submit">Actualizar Producto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>10. PUT /products/:id/photo - Actualizar Foto de Producto</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="update-photo-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="update-photo-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-photo" onchange="selectProductForPhoto()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForPhoto()">🔄 Cargar Mis Productos</button>
+        </p>
+        <p>Nueva Foto: <input type="file" name="photo" accept="image/*" required></p>
+        <button type="submit">Actualizar Foto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>11. DELETE /products/:id - Eliminar Producto</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="delete-product-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="delete-product-id" required>
+        </p>
+        <p>
+            <select id="product-select-delete" onchange="selectProductForDelete()">
+                <option value="">-- Seleccione un producto --</option>
+            </select>
+            <button type="button" onclick="loadProductsForDelete()">🔄 Cargar Mis Productos</button>
+        </p>
+        <button type="submit">Eliminar Producto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function getSupplierToken() {
+            const token = localStorage.getItem('SUPPLIER_TOKEN');
+            if (!token) {
+                alert('⚠️ Se requiere un token de Supplier');
+                return null;
+            }
+            return token;
+        }
+        
+        async function loadCategories(selectId) {
+            try {
+                const response = await fetch(`${BASE_URL}/categories?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    const hasEmpty = select.querySelector('option[value=""]');
+                    if (!hasEmpty) {
+                        select.innerHTML = '<option value="">-- Seleccione --</option>';
+                    }
+                    result.data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.categoryId;
+                        option.textContent = category.name;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Categorías cargadas');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadCategoriesForCreate() { loadCategories('category-create'); }
+        function loadCategoriesForUpdate() { loadCategories('category-update'); }
+        
+        async function loadSuppliers(selectId) {
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione un proveedor --</option>';
+                    result.data.forEach(supplier => {
+                        const option = document.createElement('option');
+                        option.value = supplier.supplierId;
+                        option.textContent = supplier.companyName;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Proveedores cargados');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadSuppliersForProducts() { loadSuppliers('supplier-select-products'); }
+        function selectSupplierForProducts() {
+            document.getElementById('supplier-id-products').value = document.getElementById('supplier-select-products').value;
+        }
+        
+        async function loadProducts(selectId) {
+            try {
+                const response = await fetch(`${BASE_URL}/products?limit=100`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+                    result.data.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.productId;
+                        option.textContent = `${product.name} - $${product.price}`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Productos cargados');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        async function loadMyProducts(selectId) {
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const profileResult = await response.json();
+                
+                if (profileResult.success) {
+                    const supplierId = profileResult.data.supplierId;
+                    const productsResponse = await fetch(`${BASE_URL}/suppliers/${supplierId}/products`);
+                    const result = await productsResponse.json();
+                    
+                    if (result.success && result.data) {
+                        const select = document.getElementById(selectId);
+                        select.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+                        result.data.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.productId;
+                            option.textContent = `${product.name} - $${product.price}`;
+                            select.appendChild(option);
+                        });
+                        alert('✅ Tus productos cargados');
+                    }
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadProductsForRelated() { loadProducts('product-select-related'); }
+        function selectProductForRelated() {
+            document.getElementById('related-product-id').value = document.getElementById('product-select-related').value;
+        }
+        
+        function loadProductsForGet() { loadProducts('product-select-get'); }
+        function selectProductForGet() {
+            document.getElementById('get-product-id').value = document.getElementById('product-select-get').value;
+        }
+        
+        function loadProductsForUpdate() { loadMyProducts('product-select-update'); }
+        function selectProductForUpdate() {
+            document.getElementById('update-product-id').value = document.getElementById('product-select-update').value;
+        }
+        
+        function loadProductsForPhoto() { loadMyProducts('product-select-photo'); }
+        function selectProductForPhoto() {
+            document.getElementById('update-photo-product-id').value = document.getElementById('product-select-photo').value;
+        }
+        
+        function loadProductsForDelete() { loadMyProducts('product-select-delete'); }
+        function selectProductForDelete() {
+            document.getElementById('delete-product-id').value = document.getElementById('product-select-delete').value;
+        }
+        
+        // 1. List Products
+        document.getElementById('list-products-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams();
+            
+            ['name', 'categoryId', 'supplierId', 'minPrice', 'maxPrice', 'minRating', 'page', 'limit'].forEach(key => {
+                const value = formData.get(key);
+                if (value) params.append(key, value);
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 2. Search Products
+        document.getElementById('search-products-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({
+                name: formData.get('name'),
+                limit: formData.get('limit')
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/search?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Top Rated
+        document.getElementById('top-rated-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({ limit: formData.get('limit') });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/top-rated?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 4. Recent Products
+        document.getElementById('recent-products-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams({ limit: formData.get('limit') });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/recent?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Products by Supplier
+        document.getElementById('products-by-supplier-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const supplierId = formData.get('supplierId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/by-supplier/${supplierId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 6. Related Products
+        document.getElementById('related-products-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/${productId}/related`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 7. Get Product by ID
+        document.getElementById('get-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/${productId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 8. Create Product
+        document.getElementById('create-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const result = await response.json();
+                showResponse(result);
+                if (result.success) {
+                    alert('✅ Producto creado');
+                    e.target.reset();
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 9. Update Product
+        document.getElementById('update-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            const data = {};
+            if (formData.get('name')) data.name = formData.get('name');
+            if (formData.get('description')) data.description = formData.get('description');
+            if (formData.get('price')) data.price = parseFloat(formData.get('price'));
+            if (formData.get('categoryId')) data.categoryId = formData.get('categoryId');
+            
+            if (Object.keys(data).length === 0) {
+                alert('Debes proporcionar al menos un campo para actualizar');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 10. Update Photo
+        document.getElementById('update-photo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            const photoFormData = new FormData();
+            photoFormData.append('photo', formData.get('photo'));
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/${productId}/photo`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: photoFormData
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 11. Delete Product
+        document.getElementById('delete-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+    </script>
+</body>
+</html>

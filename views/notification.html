@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones - TangoShop</title>
+</head>
+<body>
+    <h1>🔔 Notificaciones (3 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    <p><strong>⚠️ Todos los endpoints requieren token (Reseller o Supplier)</strong></p>
+    
+    <hr>
+    
+    <h2>1. GET /notifications - Obtener Mis Notificaciones</h2>
+    <p>Tipo de usuario:
+        <select id="user-type-notifications">
+            <option value="reseller">Revendedor</option>
+            <option value="supplier">Proveedor</option>
+        </select>
+    </p>
+    <button onclick="getMyNotifications()">Ver Mis Notificaciones</button>
+    
+    <hr>
+    
+    <h2>2. PUT /notifications/:id/read - Marcar como Leída</h2>
+    <form id="mark-read-form">
+        <p>
+            Notification ID: 
+            <input type="text" name="notificationId" id="notification-id-mark" required>
+        </p>
+        <p>
+            <select id="notification-select-mark" onchange="selectNotificationForMark()">
+                <option value="">-- Seleccione una notificación --</option>
+            </select>
+            <button type="button" onclick="loadNotificationsForMark()">🔄 Cargar Notificaciones</button>
+        </p>
+        <p>Tipo de usuario:
+            <select name="userType" required>
+                <option value="reseller">Revendedor</option>
+                <option value="supplier">Proveedor</option>
+            </select>
+        </p>
+        <button type="submit">Marcar como Leída</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. DELETE /notifications/:id - Eliminar Notificación</h2>
+    <form id="delete-notification-form">
+        <p>
+            Notification ID: 
+            <input type="text" name="notificationId" id="notification-id-delete" required>
+        </p>
+        <p>
+            <select id="notification-select-delete" onchange="selectNotificationForDelete()">
+                <option value="">-- Seleccione una notificación --</option>
+            </select>
+            <button type="button" onclick="loadNotificationsForDelete()">🔄 Cargar Notificaciones</button>
+        </p>
+        <p>Tipo de usuario:
+            <select name="userType" required>
+                <option value="reseller">Revendedor</option>
+                <option value="supplier">Proveedor</option>
+            </select>
+        </p>
+        <button type="submit">Eliminar Notificación</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function getToken(userType) {
+            const token = userType === 'reseller' 
+                ? localStorage.getItem('RESELLER_TOKEN')
+                : localStorage.getItem('SUPPLIER_TOKEN');
+            
+            if (!token) {
+                alert(`⚠️ Se requiere un token de ${userType}. Por favor, inicia sesión primero.`);
+                return null;
+            }
+            return token;
+        }
+        
+        // 1. Get My Notifications
+        async function getMyNotifications() {
+            const userType = document.getElementById('user-type-notifications').value;
+            const token = getToken(userType);
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/notifications`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+        
+        async function loadNotifications(selectId, userType) {
+            const token = getToken(userType);
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/notifications`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione una notificación --</option>';
+                    result.data.forEach(notif => {
+                        const option = document.createElement('option');
+                        option.value = notif.notificationId;
+                        const status = notif.isRead ? '✓' : '✗';
+                        option.textContent = `[${status}] ${notif.title} - ${notif.message.substring(0, 50)}...`;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Notificaciones cargadas');
+                }
+            } catch (error) {
+                alert('Error al cargar notificaciones: ' + error.message);
+            }
+        }
+        
+        function loadNotificationsForMark() {
+            const userType = document.querySelector('#mark-read-form select[name="userType"]').value;
+            loadNotifications('notification-select-mark', userType);
+        }
+        
+        function selectNotificationForMark() {
+            const select = document.getElementById('notification-select-mark');
+            const input = document.getElementById('notification-id-mark');
+            input.value = select.value;
+        }
+        
+        function loadNotificationsForDelete() {
+            const userType = document.querySelector('#delete-notification-form select[name="userType"]').value;
+            loadNotifications('notification-select-delete', userType);
+        }
+        
+        function selectNotificationForDelete() {
+            const select = document.getElementById('notification-select-delete');
+            const input = document.getElementById('notification-id-delete');
+            input.value = select.value;
+        }
+        
+        // 2. Mark as Read
+        document.getElementById('mark-read-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const notificationId = formData.get('notificationId');
+            const userType = formData.get('userType');
+            const token = getToken(userType);
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/notifications/${notificationId}/read`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Delete Notification
+        document.getElementById('delete-notification-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!confirm('¿Estás seguro de eliminar esta notificación?')) {
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const notificationId = formData.get('notificationId');
+            const userType = formData.get('userType');
+            const token = getToken(userType);
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/notifications/${notificationId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.status === 204) {
+                    showResponse({ success: true, message: 'Notificación eliminada (204 No Content)' });
+                } else {
+                    const result = await response.json();
+                    showResponse(result);
+                }
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+    </script>
+</body>
+</html>

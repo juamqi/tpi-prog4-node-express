@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - TangoShop</title>
+</head>
+<body>
+    <h1>🏢 Proveedores (10 endpoints)</h1>
+    <p><a href="index.html">← Volver al inicio</a></p>
+    
+    <hr>
+    
+    <h2>1. GET /suppliers/profile - Ver Mi Perfil</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <button onclick="getMyProfile()">Ver Mi Perfil</button>
+    
+    <hr>
+    
+    <h2>2. PUT /suppliers/profile - Actualizar Perfil</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="update-profile-form">
+        <p>Nombre de Empresa: <input type="text" name="companyName"></p>
+        <p>Teléfono: <input type="text" name="phone"></p>
+        <p>Sitio Web: <input type="url" name="website"></p>
+        <fieldset>
+            <legend>Dirección (Opcional)</legend>
+            <p>Provincia: <input type="text" name="province"></p>
+            <p>Ciudad: <input type="text" name="city"></p>
+            <p>Calle: <input type="text" name="street"></p>
+            <p>Número: <input type="text" name="number"></p>
+        </fieldset>
+        <button type="submit">Actualizar Perfil</button>
+    </form>
+    
+    <hr>
+    
+    <h2>3. PUT /suppliers/profile/photo - Actualizar Foto</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="update-photo-form">
+        <p>URL de Foto: <input type="url" name="photoURL" required></p>
+        <button type="submit">Actualizar Foto</button>
+    </form>
+    
+    <hr>
+    
+    <h2>4. GET /suppliers - Listar Proveedores</h2>
+    <form id="list-suppliers-form">
+        <p>Página: <input type="number" name="page" value="1" min="1"></p>
+        <p>Límite: <input type="number" name="limit" value="10" min="1" max="100"></p>
+        <p>Provincia: <input type="text" name="province"></p>
+        <p>Ciudad: <input type="text" name="city"></p>
+        <p>Rating Mínimo: <input type="number" name="minRating" step="0.1" min="0" max="5"></p>
+        <button type="submit">Listar Proveedores</button>
+    </form>
+    
+    <hr>
+    
+    <h2>5. GET /suppliers/products/:productId/favorites - Favoritos de un Producto</h2>
+    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <form id="product-favorites-form">
+        <p>
+            Product ID: 
+            <input type="text" name="productId" id="product-favorites-id" required>
+        </p>
+        <p>
+            <select id="my-product-select-favorites" onchange="selectMyProductForFavorites()">
+                <option value="">-- Seleccione tu producto --</option>
+            </select>
+            <button type="button" onclick="loadMyProductsForFavorites()">🔄 Cargar Mis Productos</button>
+        </p>
+        <button type="submit">Ver Favoritos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>6. GET /suppliers/:id - Obtener Proveedor por ID</h2>
+    <form id="get-supplier-form">
+        <p>
+            Supplier ID: 
+            <input type="text" name="supplierId" id="supplier-id-input" required>
+        </p>
+        <p>
+            <select id="supplier-select" onchange="selectSupplier()">
+                <option value="">-- Seleccione un proveedor --</option>
+            </select>
+            <button type="button" onclick="loadSuppliers()">🔄 Cargar Proveedores</button>
+        </p>
+        <button type="submit">Obtener Proveedor</button>
+    </form>
+    
+    <hr>
+    
+    <h2>7. GET /suppliers/:id/products - Productos del Proveedor</h2>
+    <form id="supplier-products-form">
+        <p>
+            Supplier ID: 
+            <input type="text" name="supplierId" id="supplier-products-id" required>
+        </p>
+        <p>
+            <select id="supplier-select-products" onchange="selectSupplierForProducts()">
+                <option value="">-- Seleccione un proveedor --</option>
+            </select>
+            <button type="button" onclick="loadSuppliersForProducts()">🔄 Cargar Proveedores</button>
+        </p>
+        <button type="submit">Ver Productos</button>
+    </form>
+    
+    <hr>
+    
+    <h2>8. GET /suppliers/:id/stats - Estadísticas del Proveedor</h2>
+    <form id="supplier-stats-form">
+        <p>
+            Supplier ID: 
+            <input type="text" name="supplierId" id="supplier-stats-id" required>
+        </p>
+        <p>
+            <select id="supplier-select-stats" onchange="selectSupplierForStats()">
+                <option value="">-- Seleccione un proveedor --</option>
+            </select>
+            <button type="button" onclick="loadSuppliersForStats()">🔄 Cargar Proveedores</button>
+        </p>
+        <button type="submit">Ver Estadísticas</button>
+    </form>
+    
+    <hr>
+    
+    <h2>9. GET /suppliers/:id/reviews - Reseñas del Proveedor</h2>
+    <form id="supplier-reviews-form">
+        <p>
+            Supplier ID: 
+            <input type="text" name="supplierId" id="supplier-reviews-id" required>
+        </p>
+        <p>
+            <select id="supplier-select-reviews" onchange="selectSupplierForReviews()">
+                <option value="">-- Seleccione un proveedor --</option>
+            </select>
+            <button type="button" onclick="loadSuppliersForReviews()">🔄 Cargar Proveedores</button>
+        </p>
+        <button type="submit">Ver Reseñas</button>
+    </form>
+    
+    <hr>
+    
+    <h2>10. GET /suppliers/:id/resellers - Revendedores del Proveedor</h2>
+    <form id="supplier-resellers-form">
+        <p>
+            Supplier ID: 
+            <input type="text" name="supplierId" id="supplier-resellers-id" required>
+        </p>
+        <p>
+            <select id="supplier-select-resellers" onchange="selectSupplierForResellers()">
+                <option value="">-- Seleccione un proveedor --</option>
+            </select>
+            <button type="button" onclick="loadSuppliersForResellers()">🔄 Cargar Proveedores</button>
+        </p>
+        <button type="submit">Ver Revendedores</button>
+    </form>
+    
+    <hr>
+    
+    <h2>Respuesta del Servidor</h2>
+    <pre id="response"></pre>
+    
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+        
+        function showResponse(data) {
+            document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function getSupplierToken() {
+            const token = localStorage.getItem('SUPPLIER_TOKEN');
+            if (!token) {
+                alert('⚠️ Se requiere un token de Supplier');
+                return null;
+            }
+            return token;
+        }
+        
+        async function loadSuppliers(selectId, inputId) {
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers?limit=50`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const select = document.getElementById(selectId);
+                    select.innerHTML = '<option value="">-- Seleccione un proveedor --</option>';
+                    result.data.forEach(supplier => {
+                        const option = document.createElement('option');
+                        option.value = supplier.supplierId;
+                        option.textContent = supplier.companyName;
+                        select.appendChild(option);
+                    });
+                    alert('✅ Proveedores cargados');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function loadSuppliersGeneric(selectId) { loadSuppliers(selectId); }
+        
+        function selectSupplier() {
+            document.getElementById('supplier-id-input').value = document.getElementById('supplier-select').value;
+        }
+        
+        function loadSuppliersForProducts() { loadSuppliersGeneric('supplier-select-products'); }
+        function selectSupplierForProducts() {
+            document.getElementById('supplier-products-id').value = document.getElementById('supplier-select-products').value;
+        }
+        
+        function loadSuppliersForStats() { loadSuppliersGeneric('supplier-select-stats'); }
+        function selectSupplierForStats() {
+            document.getElementById('supplier-stats-id').value = document.getElementById('supplier-select-stats').value;
+        }
+        
+        function loadSuppliersForReviews() { loadSuppliersGeneric('supplier-select-reviews'); }
+        function selectSupplierForReviews() {
+            document.getElementById('supplier-reviews-id').value = document.getElementById('supplier-select-reviews').value;
+        }
+        
+        function loadSuppliersForResellers() { loadSuppliersGeneric('supplier-select-resellers'); }
+        function selectSupplierForResellers() {
+            document.getElementById('supplier-resellers-id').value = document.getElementById('supplier-select-resellers').value;
+        }
+        
+        async function loadMyProductsForFavorites() {
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            try {
+                const profileResp = await fetch(`${BASE_URL}/suppliers/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const profileResult = await profileResp.json();
+                
+                if (profileResult.success) {
+                    const supplierId = profileResult.data.supplierId;
+                    const response = await fetch(`${BASE_URL}/suppliers/${supplierId}/products`);
+                    const result = await response.json();
+                    
+                    if (result.success && result.data) {
+                        const select = document.getElementById('my-product-select-favorites');
+                        select.innerHTML = '<option value="">-- Seleccione tu producto --</option>';
+                        result.data.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.productId;
+                            option.textContent = `${product.name} - $${product.price}`;
+                            select.appendChild(option);
+                        });
+                        alert('✅ Tus productos cargados');
+                    }
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        function selectMyProductForFavorites() {
+            document.getElementById('product-favorites-id').value = document.getElementById('my-product-select-favorites').value;
+        }
+        
+        // 1. Get My Profile
+        async function getMyProfile() {
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        }
+        
+        // 2. Update Profile
+        document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const data = {};
+            
+            ['companyName', 'phone', 'website'].forEach(key => {
+                const value = formData.get(key);
+                if (value) data[key] = value;
+            });
+            
+            const address = {};
+            ['province', 'city', 'street', 'number'].forEach(key => {
+                const value = formData.get(key);
+                if (value) address[key] = value;
+            });
+            
+            if (Object.keys(address).length > 0) {
+                data.address = address;
+            }
+            
+            if (Object.keys(data).length === 0) {
+                alert('Debes proporcionar al menos un campo para actualizar');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 3. Update Photo
+        document.getElementById('update-photo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const data = {
+                photoURL: formData.get('photoURL')
+            };
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/profile/photo`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 4. List Suppliers
+        document.getElementById('list-suppliers-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const params = new URLSearchParams();
+            
+            ['page', 'limit', 'province', 'city', 'minRating'].forEach(key => {
+                const value = formData.get(key);
+                if (value) params.append(key, value);
+            });
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers?${params}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 5. Product Favorites
+        document.getElementById('product-favorites-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = getSupplierToken();
+            if (!token) return;
+            
+            const formData = new FormData(e.target);
+            const productId = formData.get('productId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/products/${productId}/favorites`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 6. Get Supplier by ID
+        document.getElementById('get-supplier-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const supplierId = formData.get('supplierId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/${supplierId}`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 7. Supplier Products
+        document.getElementById('supplier-products-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const supplierId = formData.get('supplierId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/${supplierId}/products`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 8. Supplier Stats
+        document.getElementById('supplier-stats-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const supplierId = formData.get('supplierId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/${supplierId}/stats`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 9. Supplier Reviews
+        document.getElementById('supplier-reviews-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const supplierId = formData.get('supplierId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/${supplierId}/reviews`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+        
+        // 10. Supplier Resellers
+        document.getElementById('supplier-resellers-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const supplierId = formData.get('supplierId');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/suppliers/${supplierId}/resellers`);
+                const result = await response.json();
+                showResponse(result);
+            } catch (error) {
+                showResponse({ error: error.message });
+            }
+        });
+    </script>
+</body>
+</html>
