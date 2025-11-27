@@ -6,13 +6,13 @@
     <title>Reseñas - TangoShop</title>
 </head>
 <body>
-    <h1>⭐ Reseñas (7 endpoints)</h1>
+    <h1>Reseñas (7 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
     
     <hr>
     
     <h2>1. POST /reviews - Crear Reseña</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <form id="create-review-form">
         <p>
             Product ID: 
@@ -22,7 +22,7 @@
             <select id="product-select-review" onchange="selectProductForReview()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForReview()">🔄 Cargar Productos</button>
+            <button type="button" onclick="loadProductsForReview()">Cargar Productos</button>
         </p>
         <p>Rating: 
             <select name="rating" required>
@@ -50,7 +50,7 @@
             <select id="product-select-reviews" onchange="selectProductForReviews()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForReviews()">🔄 Cargar Productos</button>
+            <button type="button" onclick="loadProductsForReviews()">Cargar Productos</button>
         </p>
         <button type="submit">Ver Reseñas</button>
     </form>
@@ -58,13 +58,13 @@
     <hr>
     
     <h2>3. GET /reviews/user/me - Mis Reseñas</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <button onclick="getMyReviews()">Ver Mis Reseñas</button>
     
     <hr>
     
     <h2>4. POST /reviews/:id/like - Dar Like a Reseña</h2>
-    <p><strong>⚠️ Requiere token</strong></p>
+    <p><strong>Requiere token</strong></p>
     <form id="like-review-form">
         <p>
             Review ID: 
@@ -74,7 +74,7 @@
             <select id="review-select-like" onchange="selectReviewForLike()">
                 <option value="">-- Seleccione una reseña --</option>
             </select>
-            <button type="button" onclick="loadReviewsForLike()">🔄 Cargar Reseñas</button>
+            <button type="button" onclick="loadReviewsForLike()">Cargar Reseñas</button>
         </p>
         <p>Tipo de usuario:
             <select name="userType" required>
@@ -97,7 +97,7 @@
             <select id="review-select-get" onchange="selectReviewForGet()">
                 <option value="">-- Seleccione una reseña --</option>
             </select>
-            <button type="button" onclick="loadReviewsForGet()">🔄 Cargar Reseñas</button>
+            <button type="button" onclick="loadReviewsForGet()">Cargar Reseñas</button>
         </p>
         <button type="submit">Obtener Reseña</button>
     </form>
@@ -105,7 +105,7 @@
     <hr>
     
     <h2>6. PUT /reviews/:id - Actualizar Reseña</h2>
-    <p><strong>⚠️ Requiere token de Reseller (solo puedes actualizar tus reseñas)</strong></p>
+    <p><strong>Requiere token de Reseller (solo puedes actualizar tus reseñas)</strong></p>
     <form id="update-review-form">
         <p>
             Review ID: 
@@ -115,7 +115,7 @@
             <select id="my-review-select-update" onchange="selectMyReviewForUpdate()">
                 <option value="">-- Seleccione tu reseña --</option>
             </select>
-            <button type="button" onclick="loadMyReviewsForUpdate()">🔄 Cargar Mis Reseñas</button>
+            <button type="button" onclick="loadMyReviewsForUpdate()">Cargar Mis Reseñas</button>
         </p>
         <p>Rating: 
             <select name="rating">
@@ -134,7 +134,7 @@
     <hr>
     
     <h2>7. DELETE /reviews/:id - Eliminar Reseña</h2>
-    <p><strong>⚠️ Requiere token de Reseller (solo puedes eliminar tus reseñas)</strong></p>
+    <p><strong>Requiere token de Reseller (solo puedes eliminar tus reseñas)</strong></p>
     <form id="delete-review-form">
         <p>
             Review ID: 
@@ -144,7 +144,7 @@
             <select id="my-review-select-delete" onchange="selectMyReviewForDelete()">
                 <option value="">-- Seleccione tu reseña --</option>
             </select>
-            <button type="button" onclick="loadMyReviewsForDelete()">🔄 Cargar Mis Reseñas</button>
+            <button type="button" onclick="loadMyReviewsForDelete()">Cargar Mis Reseñas</button>
         </p>
         <button type="submit">Eliminar Reseña</button>
     </form>
@@ -164,7 +164,7 @@
         function getResellerToken() {
             const token = localStorage.getItem('RESELLER_TOKEN');
             if (!token) {
-                alert('⚠️ Se requiere un token de Reseller');
+                alert('Se requiere un token de Reseller');
                 return null;
             }
             return token;
@@ -176,7 +176,7 @@
                 : localStorage.getItem('SUPPLIER_TOKEN');
             
             if (!token) {
-                alert(`⚠️ Se requiere un token de ${userType}`);
+                alert(`Se requiere un token de ${userType}`);
                 return null;
             }
             return token;
@@ -196,7 +196,7 @@
                         option.textContent = `${product.name} - $${product.price}`;
                         select.appendChild(option);
                     });
-                    alert('✅ Productos cargados');
+                    alert('Productos cargados');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -239,7 +239,7 @@
                         option.textContent = `★${review.rating} - ${review.comment.substring(0, 40)}...`;
                         select.appendChild(option);
                     });
-                    alert('✅ Reseñas cargadas');
+                    alert('Reseñas cargadas');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -275,7 +275,7 @@
                         option.textContent = `★${review.rating} - ${review.comment.substring(0, 40)}...`;
                         select.appendChild(option);
                     });
-                    alert('✅ Tus reseñas cargadas');
+                    alert('Tus reseñas cargadas');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -317,7 +317,7 @@
                 const result = await response.json();
                 showResponse(result);
                 if (result.success) {
-                    alert('✅ Reseña creada');
+                    alert('Reseña creada');
                     e.target.reset();
                 }
             } catch (error) {

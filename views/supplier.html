@@ -6,19 +6,19 @@
     <title>Proveedores - TangoShop</title>
 </head>
 <body>
-    <h1>🏢 Proveedores (10 endpoints)</h1>
+    <h1>Proveedores (10 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
     
     <hr>
     
     <h2>1. GET /suppliers/profile - Ver Mi Perfil</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <button onclick="getMyProfile()">Ver Mi Perfil</button>
     
     <hr>
     
     <h2>2. PUT /suppliers/profile - Actualizar Perfil</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="update-profile-form">
         <p>Nombre de Empresa: <input type="text" name="companyName"></p>
         <p>Teléfono: <input type="text" name="phone"></p>
@@ -36,7 +36,7 @@
     <hr>
     
     <h2>3. PUT /suppliers/profile/photo - Actualizar Foto</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="update-photo-form">
         <p>URL de Foto: <input type="url" name="photoURL" required></p>
         <button type="submit">Actualizar Foto</button>
@@ -57,7 +57,7 @@
     <hr>
     
     <h2>5. GET /suppliers/products/:productId/favorites - Favoritos de un Producto</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="product-favorites-form">
         <p>
             Product ID: 
@@ -67,7 +67,7 @@
             <select id="my-product-select-favorites" onchange="selectMyProductForFavorites()">
                 <option value="">-- Seleccione tu producto --</option>
             </select>
-            <button type="button" onclick="loadMyProductsForFavorites()">🔄 Cargar Mis Productos</button>
+            <button type="button" onclick="loadMyProductsForFavorites()">Cargar Mis Productos</button>
         </p>
         <button type="submit">Ver Favoritos</button>
     </form>
@@ -84,7 +84,7 @@
             <select id="supplier-select" onchange="selectSupplier()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliers()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliers()">Cargar Proveedores</button>
         </p>
         <button type="submit">Obtener Proveedor</button>
     </form>
@@ -101,7 +101,7 @@
             <select id="supplier-select-products" onchange="selectSupplierForProducts()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliersForProducts()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliersForProducts()">Cargar Proveedores</button>
         </p>
         <button type="submit">Ver Productos</button>
     </form>
@@ -118,7 +118,7 @@
             <select id="supplier-select-stats" onchange="selectSupplierForStats()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliersForStats()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliersForStats()">Cargar Proveedores</button>
         </p>
         <button type="submit">Ver Estadísticas</button>
     </form>
@@ -135,7 +135,7 @@
             <select id="supplier-select-reviews" onchange="selectSupplierForReviews()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliersForReviews()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliersForReviews()">Cargar Proveedores</button>
         </p>
         <button type="submit">Ver Reseñas</button>
     </form>
@@ -152,7 +152,7 @@
             <select id="supplier-select-resellers" onchange="selectSupplierForResellers()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliersForResellers()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliersForResellers()">Cargar Proveedores</button>
         </p>
         <button type="submit">Ver Revendedores</button>
     </form>
@@ -172,7 +172,7 @@
         function getSupplierToken() {
             const token = localStorage.getItem('SUPPLIER_TOKEN');
             if (!token) {
-                alert('⚠️ Se requiere un token de Supplier');
+                alert('Se requiere un token de Supplier');
                 return null;
             }
             return token;
@@ -192,7 +192,7 @@
                         option.textContent = supplier.companyName;
                         select.appendChild(option);
                     });
-                    alert('✅ Proveedores cargados');
+                    alert('Proveedores cargados');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -249,7 +249,7 @@
                             option.textContent = `${product.name} - $${product.price}`;
                             select.appendChild(option);
                         });
-                        alert('✅ Tus productos cargados');
+                        alert('Tus productos cargados');
                     }
                 }
             } catch (error) {

@@ -12,13 +12,13 @@
     <hr>
     
     <h2>1. GET /resellers/profile - Ver Mi Perfil</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <button onclick="getMyProfile()">Ver Mi Perfil</button>
     
     <hr>
     
     <h2>2. PUT /resellers/profile - Actualizar Perfil</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <form id="update-profile-form">
         <p>Nombre: <input type="text" name="firstName"></p>
         <p>Apellido: <input type="text" name="lastName"></p>
@@ -30,7 +30,7 @@
     <hr>
     
     <h2>3. PUT /resellers/profile/photo - Actualizar Foto</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <form id="update-photo-form">
         <p>URL de Foto: <input type="url" name="photoURL" required></p>
         <button type="submit">Actualizar Foto</button>
@@ -57,7 +57,7 @@
             <select id="reseller-select" onchange="selectReseller()">
                 <option value="">-- Seleccione un revendedor --</option>
             </select>
-            <button type="button" onclick="loadResellers()">🔄 Cargar Revendedores</button>
+            <button type="button" onclick="loadResellers()">Cargar Revendedores</button>
         </p>
         <button type="submit">Obtener Revendedor</button>
     </form>
@@ -65,14 +65,14 @@
     <hr>
     
     <h2>6. PUT /resellers/account/deactivate - Desactivar Cuenta</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
-    <p><strong>⚠️ Esta acción es permanente</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
+    <p><strong>Esta acción es permanente</strong></p>
     <button onclick="deactivateAccount()">Desactivar Mi Cuenta</button>
     
     <hr>
     
     <h2>7. GET /resellers/profile/stats - Estadísticas Detalladas</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <button onclick="getDetailedStats()">Ver Mis Estadísticas</button>
     
     <hr>
@@ -90,7 +90,7 @@
         function getResellerToken() {
             const token = localStorage.getItem('RESELLER_TOKEN');
             if (!token) {
-                alert('⚠️ Se requiere un token de Reseller');
+                alert('Se requiere un token de Reseller');
                 return null;
             }
             return token;
@@ -110,7 +110,7 @@
                         option.textContent = `${reseller.firstName} ${reseller.lastName}`;
                         select.appendChild(option);
                     });
-                    alert('✅ Revendedores cargados');
+                    alert('Revendedores cargados');
                 }
             } catch (error) {
                 alert('Error al cargar revendedores: ' + error.message);
@@ -239,7 +239,7 @@
             const token = getResellerToken();
             if (!token) return;
             
-            if (!confirm('⚠️ ¿Estás seguro de que quieres desactivar tu cuenta? Esta acción es permanente.')) {
+            if (!confirm('¿Estás seguro de que quieres desactivar tu cuenta? Esta acción es permanente.')) {
                 return;
             }
             

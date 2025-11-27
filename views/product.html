@@ -6,7 +6,7 @@
     <title>Productos - TangoShop</title>
 </head>
 <body>
-    <h1>📦 Productos (11 endpoints)</h1>
+    <h1>Productos (11 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
     
     <hr>
@@ -61,7 +61,7 @@
             <select id="supplier-select-products" onchange="selectSupplierForProducts()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliersForProducts()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliersForProducts()">Cargar Proveedores</button>
         </p>
         <button type="submit">Ver Productos</button>
     </form>
@@ -78,7 +78,7 @@
             <select id="product-select-related" onchange="selectProductForRelated()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForRelated()">🔄 Cargar Productos</button>
+            <button type="button" onclick="loadProductsForRelated()">Cargar Productos</button>
         </p>
         <button type="submit">Ver Relacionados</button>
     </form>
@@ -95,7 +95,7 @@
             <select id="product-select-get" onchange="selectProductForGet()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForGet()">🔄 Cargar Productos</button>
+            <button type="button" onclick="loadProductsForGet()">Cargar Productos</button>
         </p>
         <button type="submit">Obtener Producto</button>
     </form>
@@ -103,7 +103,7 @@
     <hr>
     
     <h2>8. POST /products - Crear Producto</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="create-product-form">
         <p>Nombre: <input type="text" name="name" required></p>
         <p>Descripción: <textarea name="description"></textarea></p>
@@ -113,7 +113,7 @@
             <select name="categoryId" id="category-create" required>
                 <option value="">-- Seleccione --</option>
             </select>
-            <button type="button" onclick="loadCategoriesForCreate()">🔄 Cargar</button>
+            <button type="button" onclick="loadCategoriesForCreate()">Cargar</button>
         </p>
         <p>Foto (opcional): <input type="file" name="photo" accept="image/*"></p>
         <button type="submit">Crear Producto</button>
@@ -122,7 +122,7 @@
     <hr>
     
     <h2>9. PUT /products/:id - Actualizar Producto</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="update-product-form">
         <p>
             Product ID: 
@@ -132,7 +132,7 @@
             <select id="product-select-update" onchange="selectProductForUpdate()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForUpdate()">🔄 Cargar Mis Productos</button>
+            <button type="button" onclick="loadProductsForUpdate()">Cargar Mis Productos</button>
         </p>
         <p>Nombre: <input type="text" name="name"></p>
         <p>Descripción: <textarea name="description"></textarea></p>
@@ -142,7 +142,7 @@
             <select name="categoryId" id="category-update">
                 <option value="">-- Sin cambios --</option>
             </select>
-            <button type="button" onclick="loadCategoriesForUpdate()">🔄 Cargar</button>
+            <button type="button" onclick="loadCategoriesForUpdate()">Cargar</button>
         </p>
         <button type="submit">Actualizar Producto</button>
     </form>
@@ -150,7 +150,7 @@
     <hr>
     
     <h2>10. PUT /products/:id/photo - Actualizar Foto de Producto</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="update-photo-form">
         <p>
             Product ID: 
@@ -160,7 +160,7 @@
             <select id="product-select-photo" onchange="selectProductForPhoto()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForPhoto()">🔄 Cargar Mis Productos</button>
+            <button type="button" onclick="loadProductsForPhoto()">Cargar Mis Productos</button>
         </p>
         <p>Nueva Foto: <input type="file" name="photo" accept="image/*" required></p>
         <button type="submit">Actualizar Foto</button>
@@ -169,7 +169,7 @@
     <hr>
     
     <h2>11. DELETE /products/:id - Eliminar Producto</h2>
-    <p><strong>⚠️ Requiere token de Supplier</strong></p>
+    <p><strong>Requiere token de Supplier</strong></p>
     <form id="delete-product-form">
         <p>
             Product ID: 
@@ -179,7 +179,7 @@
             <select id="product-select-delete" onchange="selectProductForDelete()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForDelete()">🔄 Cargar Mis Productos</button>
+            <button type="button" onclick="loadProductsForDelete()">Cargar Mis Productos</button>
         </p>
         <button type="submit">Eliminar Producto</button>
     </form>
@@ -199,7 +199,7 @@
         function getSupplierToken() {
             const token = localStorage.getItem('SUPPLIER_TOKEN');
             if (!token) {
-                alert('⚠️ Se requiere un token de Supplier');
+                alert('Se requiere un token de Supplier');
                 return null;
             }
             return token;
@@ -222,7 +222,7 @@
                         option.textContent = category.name;
                         select.appendChild(option);
                     });
-                    alert('✅ Categorías cargadas');
+                    alert('Categorías cargadas');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -246,7 +246,7 @@
                         option.textContent = supplier.companyName;
                         select.appendChild(option);
                     });
-                    alert('✅ Proveedores cargados');
+                    alert('Proveedores cargados');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -272,7 +272,7 @@
                         option.textContent = `${product.name} - $${product.price}`;
                         select.appendChild(option);
                     });
-                    alert('✅ Productos cargados');
+                    alert('Productos cargados');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -303,7 +303,7 @@
                             option.textContent = `${product.name} - $${product.price}`;
                             select.appendChild(option);
                         });
-                        alert('✅ Tus productos cargados');
+                        alert('Tus productos cargados');
                     }
                 }
             } catch (error) {
@@ -466,7 +466,7 @@
                 const result = await response.json();
                 showResponse(result);
                 if (result.success) {
-                    alert('✅ Producto creado');
+                    alert('Producto creado');
                     e.target.reset();
                 }
             } catch (error) {

@@ -6,7 +6,7 @@
     <title>Búsquedas - TangoShop</title>
 </head>
 <body>
-    <h1>🔍 Sistema de Búsquedas (5 endpoints)</h1>
+    <h1>Sistema de Búsquedas (5 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
     
     <hr>
@@ -28,7 +28,7 @@
                 <select name="categoryId" id="category-filter">
                     <option value="">-- Todas --</option>
                 </select>
-                <button type="button" onclick="loadCategoriesForFilter()">🔄 Cargar</button>
+                <button type="button" onclick="loadCategoriesForFilter()">Cargar</button>
             </p>
             <p>Provincia: <input type="text" name="province"></p>
             <p>Precio Mínimo: <input type="number" name="minPrice" step="0.01"></p>
@@ -55,7 +55,7 @@
             <select id="product-select-related" onchange="selectProductForRelated()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForRelated()">🔄 Cargar Productos</button>
+            <button type="button" onclick="loadProductsForRelated()">Cargar Productos</button>
         </p>
         <button type="submit">Ver Productos Relacionados</button>
     </form>
@@ -72,7 +72,7 @@
             <select id="supplier-select" onchange="selectSupplier()">
                 <option value="">-- Seleccione un proveedor --</option>
             </select>
-            <button type="button" onclick="loadSuppliersForSearch()">🔄 Cargar Proveedores</button>
+            <button type="button" onclick="loadSuppliersForSearch()">Cargar Proveedores</button>
         </p>
         <button type="submit">Ver Productos del Proveedor</button>
     </form>
@@ -80,7 +80,7 @@
     <hr>
     
     <h2>5. GET /search/resellers/:id/favorite-suppliers - Proveedores Favoritos de Revendedor</h2>
-    <p><strong>⚠️ Requiere token de Reseller</strong></p>
+    <p><strong>Requiere token de Reseller</strong></p>
     <form id="favorite-suppliers-form">
         <p>Reseller ID: <input type="text" name="resellerId" required></p>
         <p><em>Nota: Solo puedes ver tus propios proveedores favoritos</em></p>
@@ -102,7 +102,7 @@
         function getResellerToken() {
             const token = localStorage.getItem('RESELLER_TOKEN');
             if (!token) {
-                alert('⚠️ Se requiere un token de Reseller');
+                alert('Se requiere un token de Reseller');
                 return null;
             }
             return token;
@@ -122,7 +122,7 @@
                         option.textContent = category.name;
                         select.appendChild(option);
                     });
-                    alert('✅ Categorías cargadas');
+                    alert('Categorías cargadas');
                 }
             } catch (error) {
                 alert('Error al cargar categorías: ' + error.message);
@@ -176,7 +176,7 @@
                         option.textContent = `${product.name} - $${product.price}`;
                         select.appendChild(option);
                     });
-                    alert('✅ Productos cargados');
+                    alert('Productos cargados');
                 }
             } catch (error) {
                 alert('Error al cargar productos: ' + error.message);
@@ -217,7 +217,7 @@
                         option.textContent = supplier.companyName;
                         select.appendChild(option);
                     });
-                    alert('✅ Proveedores cargados');
+                    alert('Proveedores cargados');
                 }
             } catch (error) {
                 alert('Error al cargar proveedores: ' + error.message);

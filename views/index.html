@@ -6,14 +6,14 @@
     <title>TangoShop API - Probador de Endpoints</title>
 </head>
 <body>
-    <h1>🛍️ TangoShop API - Probador de Endpoints</h1>
+    <h1>TangoShop API - Probador de Endpoints</h1>
     <p>Bienvenido al sistema de pruebas de la API de TangoShop</p>
     
     <hr>
     
-    <h2>📋 Módulos Disponibles</h2>
+    <h2>Módulos Disponibles</h2>
     
-    <h3>🔐 Autenticación (7 endpoints)</h3>
+    <h3>Autenticación (7 endpoints)</h3>
     <ul>
         <li><a href="auth.html">Ir a Autenticación</a></li>
         <li>Registro de Revendedores</li>
@@ -25,7 +25,7 @@
         <li>Restablecer Contraseña</li>
     </ul>
     
-    <h3>📦 Categorías (5 endpoints)</h3>
+    <h3>Categorías (5 endpoints)</h3>
     <ul>
         <li><a href="category.html">Ir a Categorías</a></li>
         <li>Listar Categorías</li>
@@ -35,7 +35,7 @@
         <li>Proveedores de una Categoría</li>
     </ul>
     
-    <h3>⭐ Favoritos (7 endpoints)</h3>
+    <h3>Favoritos (7 endpoints)</h3>
     <ul>
         <li><a href="favorite.html">Ir a Favoritos</a></li>
         <li>Agregar Favorito</li>
@@ -47,7 +47,7 @@
         <li>Eliminar Favorito</li>
     </ul>
     
-    <h3>🔔 Notificaciones (3 endpoints)</h3>
+    <h3>Notificaciones (3 endpoints)</h3>
     <ul>
         <li><a href="notification.html">Ir a Notificaciones</a></li>
         <li>Obtener Notificaciones</li>
@@ -55,7 +55,7 @@
         <li>Eliminar Notificación</li>
     </ul>
     
-    <h3>📦 Productos (11 endpoints)</h3>
+    <h3>Productos (11 endpoints)</h3>
     <ul>
         <li><a href="product.html">Ir a Productos</a></li>
         <li>Listar Productos</li>
@@ -71,7 +71,7 @@
         <li>Eliminar Producto</li>
     </ul>
     
-    <h3>👤 Revendedores (7 endpoints)</h3>
+    <h3>Revendedores (7 endpoints)</h3>
     <ul>
         <li><a href="reseller.html">Ir a Revendedores</a></li>
         <li>Ver Perfil</li>
@@ -83,7 +83,7 @@
         <li>Estadísticas Detalladas</li>
     </ul>
     
-    <h3>⭐ Reseñas (7 endpoints)</h3>
+    <h3>Reseñas (7 endpoints)</h3>
     <ul>
         <li><a href="review.html">Ir a Reseñas</a></li>
         <li>Crear Reseña</li>
@@ -95,7 +95,7 @@
         <li>Eliminar Reseña</li>
     </ul>
     
-    <h3>🔍 Búsquedas (5 endpoints)</h3>
+    <h3>Búsquedas (5 endpoints)</h3>
     <ul>
         <li><a href="search.html">Ir a Búsquedas</a></li>
         <li>Búsqueda Avanzada</li>
@@ -105,7 +105,7 @@
         <li>Proveedores Favoritos</li>
     </ul>
     
-    <h3>🏢 Proveedores (10 endpoints)</h3>
+    <h3>Proveedores (10 endpoints)</h3>
     <ul>
         <li><a href="supplier.html">Ir a Proveedores</a></li>
         <li>Ver Perfil</li>
@@ -122,22 +122,22 @@
     
     <hr>
     
-    <h2>📝 Información de Tokens</h2>
+    <h2>Información de Tokens</h2>
     <p><strong>Token de Revendedor almacenado:</strong> <span id="reseller-token-status">No hay token</span></p>
     <p><strong>Token de Proveedor almacenado:</strong> <span id="supplier-token-status">No hay token</span></p>
     
-    <button onclick="clearTokens()">🗑️ Limpiar Tokens</button>
+    <button onclick="clearTokens()">Limpiar Tokens</button>
     
     <hr>
     
-    <h2>🌐 Configuración</h2>
+    <h2>Configuración</h2>
     <p><strong>URL Base:</strong> http://localhost:3000</p>
     <p><strong>Estado de la API:</strong> <span id="api-status">Verificando...</span></p>
-    <button onclick="checkAPIStatus()">🔄 Verificar Estado</button>
+    <button onclick="checkAPIStatus()">Verificar Estado</button>
     
     <hr>
     
-    <h2>📊 Total de Endpoints: 62</h2>
+    <h2>Total de Endpoints: 62</h2>
     
     <script>
         const BASE_URL = 'http://localhost:3000';
@@ -147,9 +147,9 @@
             const supplierToken = localStorage.getItem('SUPPLIER_TOKEN');
             
             document.getElementById('reseller-token-status').textContent = 
-                resellerToken ? '✅ Token presente' : '❌ No hay token';
+                resellerToken ? 'Token presente' : 'No hay token';
             document.getElementById('supplier-token-status').textContent = 
-                supplierToken ? '✅ Token presente' : '❌ No hay token';
+                supplierToken ? 'Token presente' : 'No hay token';
         }
         
         function clearTokens() {
@@ -158,7 +158,7 @@
                 localStorage.removeItem('SUPPLIER_TOKEN');
                 localStorage.removeItem('REFRESH_TOKEN');
                 updateTokenStatus();
-                alert('✅ Tokens limpiados exitosamente');
+                alert('Tokens limpiados exitosamente');
             }
         }
         
@@ -168,10 +168,10 @@
                 const response = await fetch(`${BASE_URL}/`);
                 const data = await response.json();
                 document.getElementById('api-status').textContent = 
-                    `✅ ${data.status} - v${data.version}`;
+                    `${data.status} - v${data.version}`;
             } catch (error) {
                 document.getElementById('api-status').textContent = 
-                    '❌ Error: ' + error.message;
+                    'Error: ' + error.message;
             }
         }
         

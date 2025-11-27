@@ -6,7 +6,7 @@
     <title>Categorías - TangoShop</title>
 </head>
 <body>
-    <h1>📦 Categorías (5 endpoints)</h1>
+    <h1>Categorías (5 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
     
     <hr>
@@ -38,7 +38,7 @@
             <select id="category-select" onchange="selectCategory()">
                 <option value="">-- Seleccione una categoría --</option>
             </select>
-            <button type="button" onclick="loadCategories()">🔄 Cargar Categorías</button>
+            <button type="button" onclick="loadCategories()">Cargar Categorías</button>
         </p>
         <button type="submit">Obtener Categoría</button>
     </form>
@@ -55,7 +55,7 @@
             <select id="category-select-products" onchange="selectCategoryForProducts()">
                 <option value="">-- Seleccione una categoría --</option>
             </select>
-            <button type="button" onclick="loadCategoriesForProducts()">🔄 Cargar Categorías</button>
+            <button type="button" onclick="loadCategoriesForProducts()">Cargar Categorías</button>
         </p>
         <button type="submit">Ver Productos</button>
     </form>
@@ -72,7 +72,7 @@
             <select id="category-select-suppliers" onchange="selectCategoryForSuppliers()">
                 <option value="">-- Seleccione una categoría --</option>
             </select>
-            <button type="button" onclick="loadCategoriesForSuppliers()">🔄 Cargar Categorías</button>
+            <button type="button" onclick="loadCategoriesForSuppliers()">Cargar Categorías</button>
         </p>
         <button type="submit">Ver Proveedores</button>
     </form>
@@ -103,7 +103,7 @@
                         option.textContent = category.name;
                         select.appendChild(option);
                     });
-                    alert('✅ Categorías cargadas');
+                    alert('Categorías cargadas');
                 }
             } catch (error) {
                 alert('Error al cargar categorías: ' + error.message);
@@ -130,7 +130,7 @@
                         option.textContent = category.name;
                         select.appendChild(option);
                     });
-                    alert('✅ Categorías cargadas');
+                    alert('Categorías cargadas');
                 }
             } catch (error) {
                 alert('Error al cargar categorías: ' + error.message);
@@ -157,7 +157,7 @@
                         option.textContent = category.name;
                         select.appendChild(option);
                     });
-                    alert('✅ Categorías cargadas');
+                    alert('Categorías cargadas');
                 }
             } catch (error) {
                 alert('Error al cargar categorías: ' + error.message);

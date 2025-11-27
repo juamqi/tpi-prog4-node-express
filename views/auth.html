@@ -6,7 +6,7 @@
     <title>Autenticación - TangoShop</title>
 </head>
 <body>
-    <h1>🔐 Autenticación (7 endpoints)</h1>
+    <h1>Autenticación (7 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
     
     <hr>
@@ -58,7 +58,7 @@
     <hr>
     
     <h2>4. POST /auth/logout - Cerrar Sesión</h2>
-    <p><strong>⚠️ Requiere token</strong></p>
+    <p><strong>Requiere token</strong></p>
     <form id="logout-form">
         <p>Tipo de usuario:
             <select name="userType">
@@ -76,7 +76,7 @@
         <p>Refresh Token:
             <input type="text" name="refreshToken" id="refresh-token-input" required>
         </p>
-        <button type="button" onclick="loadRefreshToken()">📋 Cargar desde localStorage</button>
+        <button type="button" onclick="loadRefreshToken()">Cargar desde localStorage</button>
         <br><br>
         <button type="submit">Renovar Token</button>
     </form>
@@ -102,7 +102,7 @@
     
     <hr>
     
-    <h2>📊 Estado de Tokens</h2>
+    <h2>Estado de Tokens</h2>
     <p><strong>Token Revendedor:</strong> <span id="reseller-token">No hay token</span></p>
     <p><strong>Token Proveedor:</strong> <span id="supplier-token">No hay token</span></p>
     <p><strong>Refresh Token:</strong> <span id="refresh-token-display">No hay token</span></p>
@@ -137,9 +137,9 @@
             const refreshToken = localStorage.getItem('REFRESH_TOKEN');
             if (refreshToken) {
                 document.getElementById('refresh-token-input').value = refreshToken;
-                alert('✅ Refresh token cargado');
+                alert('Refresh token cargado');
             } else {
-                alert('❌ No hay refresh token guardado');
+                alert('No hay refresh token guardado');
             }
         }
         
@@ -165,7 +165,7 @@
                 const result = await response.json();
                 showResponse(result);
                 if (result.success) {
-                    alert('✅ Revendedor registrado exitosamente');
+                    alert('Revendedor registrado exitosamente');
                     e.target.reset();
                 }
             } catch (error) {
@@ -200,7 +200,7 @@
                 const result = await response.json();
                 showResponse(result);
                 if (result.success) {
-                    alert('✅ Proveedor registrado exitosamente');
+                    alert('Proveedor registrado exitosamente');
                     e.target.reset();
                 }
             } catch (error) {
@@ -242,7 +242,7 @@
                     }
                     
                     updateTokenDisplay();
-                    alert(`✅ Login exitoso como ${userType}`);
+                    alert(`Login exitoso como ${userType}`);
                 }
             } catch (error) {
                 showResponse({ error: error.message });
@@ -262,7 +262,7 @@
             const refreshToken = localStorage.getItem('REFRESH_TOKEN');
             
             if (!token) {
-                alert('❌ No hay token de ' + userType);
+                alert('No hay token de ' + userType);
                 return;
             }
             
@@ -286,7 +286,7 @@
                     }
                     localStorage.removeItem('REFRESH_TOKEN');
                     updateTokenDisplay();
-                    alert('✅ Logout exitoso');
+                    alert('Logout exitoso');
                 }
             } catch (error) {
                 showResponse({ error: error.message });
@@ -321,7 +321,7 @@
                     }
                     
                     updateTokenDisplay();
-                    alert('✅ Token renovado exitosamente');
+                    alert('Token renovado exitosamente');
                 }
             } catch (error) {
                 showResponse({ error: error.message });
@@ -345,7 +345,7 @@
                 const result = await response.json();
                 showResponse(result);
                 if (result.success) {
-                    alert('✅ Email de recuperación enviado');
+                    alert('Email de recuperación enviado');
                 }
             } catch (error) {
                 showResponse({ error: error.message });
@@ -370,7 +370,7 @@
                 const result = await response.json();
                 showResponse(result);
                 if (result.success) {
-                    alert('✅ Contraseña restablecida exitosamente');
+                    alert('Contraseña restablecida exitosamente');
                     e.target.reset();
                 }
             } catch (error) {

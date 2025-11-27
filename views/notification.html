@@ -6,9 +6,9 @@
     <title>Notificaciones - TangoShop</title>
 </head>
 <body>
-    <h1>🔔 Notificaciones (3 endpoints)</h1>
+    <h1>Notificaciones (3 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
-    <p><strong>⚠️ Todos los endpoints requieren token (Reseller o Supplier)</strong></p>
+    <p><strong>Todos los endpoints requieren token (Reseller o Supplier)</strong></p>
     
     <hr>
     
@@ -33,7 +33,7 @@
             <select id="notification-select-mark" onchange="selectNotificationForMark()">
                 <option value="">-- Seleccione una notificación --</option>
             </select>
-            <button type="button" onclick="loadNotificationsForMark()">🔄 Cargar Notificaciones</button>
+            <button type="button" onclick="loadNotificationsForMark()">Cargar Notificaciones</button>
         </p>
         <p>Tipo de usuario:
             <select name="userType" required>
@@ -56,7 +56,7 @@
             <select id="notification-select-delete" onchange="selectNotificationForDelete()">
                 <option value="">-- Seleccione una notificación --</option>
             </select>
-            <button type="button" onclick="loadNotificationsForDelete()">🔄 Cargar Notificaciones</button>
+            <button type="button" onclick="loadNotificationsForDelete()">Cargar Notificaciones</button>
         </p>
         <p>Tipo de usuario:
             <select name="userType" required>
@@ -85,7 +85,7 @@
                 : localStorage.getItem('SUPPLIER_TOKEN');
             
             if (!token) {
-                alert(`⚠️ Se requiere un token de ${userType}. Por favor, inicia sesión primero.`);
+                alert(`Se requiere un token de ${userType}. Por favor, inicia sesión primero.`);
                 return null;
             }
             return token;
@@ -128,7 +128,7 @@
                         option.textContent = `[${status}] ${notif.title} - ${notif.message.substring(0, 50)}...`;
                         select.appendChild(option);
                     });
-                    alert('✅ Notificaciones cargadas');
+                    alert('Notificaciones cargadas');
                 }
             } catch (error) {
                 alert('Error al cargar notificaciones: ' + error.message);

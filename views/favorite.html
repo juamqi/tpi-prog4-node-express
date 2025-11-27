@@ -6,9 +6,9 @@
     <title>Favoritos - TangoShop</title>
 </head>
 <body>
-    <h1>⭐ Favoritos (7 endpoints)</h1>
+    <h1>Favoritos (7 endpoints)</h1>
     <p><a href="index.html">← Volver al inicio</a></p>
-    <p><strong>⚠️ Todos los endpoints requieren token de Reseller</strong></p>
+    <p><strong>Todos los endpoints requieren token de Reseller</strong></p>
     
     <hr>
     
@@ -22,7 +22,7 @@
             <select id="product-select-add" onchange="selectProductForAdd()">
                 <option value="">-- Seleccione un producto --</option>
             </select>
-            <button type="button" onclick="loadProductsForAdd()">🔄 Cargar Productos</button>
+            <button type="button" onclick="loadProductsForAdd()">Cargar Productos</button>
         </p>
         <button type="submit">Agregar a Favoritos</button>
     </form>
@@ -53,7 +53,7 @@
             <select id="favorite-select-markup" onchange="selectFavoriteForMarkup()">
                 <option value="">-- Seleccione un favorito --</option>
             </select>
-            <button type="button" onclick="loadFavoritesForMarkup()">🔄 Cargar Favoritos</button>
+            <button type="button" onclick="loadFavoritesForMarkup()">Cargar Favoritos</button>
         </p>
         <button type="submit">Ver Markup</button>
     </form>
@@ -70,7 +70,7 @@
             <select id="favorite-select-set-markup" onchange="selectFavoriteForSetMarkup()">
                 <option value="">-- Seleccione un favorito --</option>
             </select>
-            <button type="button" onclick="loadFavoritesForSetMarkup()">🔄 Cargar Favoritos</button>
+            <button type="button" onclick="loadFavoritesForSetMarkup()">Cargar Favoritos</button>
         </p>
         <p>Tipo de Markup:
             <select name="markupType" id="markup-type" required onchange="toggleMarkupValue()">
@@ -98,7 +98,7 @@
             <select id="favorite-select-detail" onchange="selectFavoriteForDetail()">
                 <option value="">-- Seleccione un favorito --</option>
             </select>
-            <button type="button" onclick="loadFavoritesForDetail()">🔄 Cargar Favoritos</button>
+            <button type="button" onclick="loadFavoritesForDetail()">Cargar Favoritos</button>
         </p>
         <button type="submit">Ver Detalle</button>
     </form>
@@ -115,7 +115,7 @@
             <select id="favorite-select-remove" onchange="selectFavoriteForRemove()">
                 <option value="">-- Seleccione un favorito --</option>
             </select>
-            <button type="button" onclick="loadFavoritesForRemove()">🔄 Cargar Favoritos</button>
+            <button type="button" onclick="loadFavoritesForRemove()">Cargar Favoritos</button>
         </p>
         <button type="submit">Eliminar de Favoritos</button>
     </form>
@@ -135,7 +135,7 @@
         function getResellerToken() {
             const token = localStorage.getItem('RESELLER_TOKEN');
             if (!token) {
-                alert('⚠️ Se requiere un token de Reseller. Por favor, inicia sesión primero.');
+                alert('Se requiere un token de Reseller. Por favor, inicia sesión primero.');
                 return null;
             }
             return token;
@@ -172,7 +172,7 @@
                         option.textContent = `${product.name} - $${product.price}`;
                         select.appendChild(option);
                     });
-                    alert('✅ Productos cargados');
+                    alert('Productos cargados');
                 }
             } catch (error) {
                 alert('Error al cargar productos: ' + error.message);
@@ -204,7 +204,7 @@
                         option.textContent = `${fav.product?.name || 'Producto'} - $${fav.product?.price || 0}`;
                         select.appendChild(option);
                     });
-                    alert('✅ Favoritos cargados');
+                    alert('Favoritos cargados');
                 }
             } catch (error) {
                 alert('Error al cargar favoritos: ' + error.message);
