@@ -12,6 +12,7 @@ router.put('/profile/photo', authenticate, validate(updatePhotoSchema), reseller
 router.get('/', validateQuery(listResellersSchema), resellerController.listResellers);
 router.get('/:id', validateParams(getResellerByIdSchema), resellerController.getResellerById);
 router.put('/account/deactivate', authenticate, resellerController.deactivateAccount);
+router.get('/profile/stats', authenticate, resellerController.getDetailedStats);
 
 
 

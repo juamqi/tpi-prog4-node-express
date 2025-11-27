@@ -62,20 +62,6 @@ async function notifySupplierNewReview(
   });
 }
 
-async function notifyCatalogGenerated(resellerId, catalogUrl) {
-  return db.collection('notifications').add({
-    userId: resellerId,
-    type: 'catalog_generated',
-    title: 'Catalogo generado exitosamente',
-    message: 'Tu catalogo está listo para compartir con tus clientes',
-    data: {
-      catalogUrl,
-    },
-    isRead: false,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-}
-
 async function notifyProductUpdated(resellerId, productId, productName, changes) {
   const changesList = changes.map((c) => c.field).join(', ');
 
@@ -94,10 +80,69 @@ async function notifyProductUpdated(resellerId, productId, productName, changes)
   });
 }
 
+async function notifyFavoriteAdded(
+  resellerId,
+  productId,
+  productName,
+  markupType,
+  markupValue,
+  finalPrice
+) {
+  const markupText = markupType === 'fixed' 
+    ? `$${markupValue} fijo`
+    : `${markupValue}% porcentaje`;
+
+  return db.collection('notifications').add({
+    userId: resellerId,
+    type: 'favorite_added',
+    title: 'Producto agregado a tu catalogo',
+    message: `"${productName}" se agreg correctamente con markup ${markupText}. Precio final: $${finalPrice}`,
+    data: {
+      productId,
+      productName,
+      markupType,
+      markupValue,
+      finalPrice,
+    },
+    isRead: false,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+async function notifyMarkupUpdated(
+  resellerId,
+  productId,
+  productName,
+  markupType,
+  markupValue,
+  finalPrice
+) {
+  const markupText = markupType === 'fixed' 
+    ? `$${markupValue} fijo`
+    : `${markupValue}% porcentaje`;
+
+  return db.collection('notifications').add({
+    userId: resellerId,
+    type: 'markup_updated',
+    title: 'Markup actualizado',
+    message: `"${productName}" se updateo correctamente: markup ${markupText}, precio final: $${finalPrice}`,
+    data: {
+      productId,
+      productName,
+      markupType,
+      markupValue,
+      finalPrice,
+    },
+    isRead: false,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 module.exports = {
   createWelcomeNotification,
   notifySupplierProductFavorited,
   notifySupplierNewReview,
-  notifyCatalogGenerated,
   notifyProductUpdated,
+  notifyMarkupUpdated,
+  notifyFavoriteAdded
 };
