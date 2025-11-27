@@ -368,6 +368,53 @@ class AuthService:
         batch.commit()
 
         return {'message': 'Contraseña restablecida exitosamente'}
+    
+    def reactivate_account(self, email: str, password: str) -> Dict:
+        user_doc = self._find_user_by_email(email)
+        if not user_doc:
+            raise ValueError('Credenciales invalidas')
+
+        user_data = user_doc.to_dict()
+        user_id = user_doc.id
+
+        if user_data.get('userType') != 'reseller':
+            raise ValueError('Solo los revendedores pueden reactivar su cuenta')
+
+        if not bcrypt.checkpw(password.encode(), user_data['password'].encode()):
+            raise ValueError('Credenciales invalidas')
+
+        if user_data.get('isActive', True):
+            raise ValueError('La cuenta ya esta activa')
+
+        db.collection('users').document(user_id).update({
+            'isActive': True,
+            'updatedAt': firestore.SERVER_TIMESTAMP,
+        })
+
+        db.collection('notifications').add({
+            'userId': user_id,
+            'type': 'account_reactivated',
+            'title': 'Cuenta reactivada',
+            'message': 'Tu cuenta ha sido reactivada exitosamente. Bienvenido de nuevo!',
+            'data': {'reactivatedAt': firestore.SERVER_TIMESTAMP},
+            'isRead': False,
+            'createdAt': firestore.SERVER_TIMESTAMP,
+        })
+
+        access_token, refresh_token = self._generate_tokens(user_id, email, user_data['userType'])
+
+        return {
+            'message': 'Cuenta reactivada exitosamente',
+            'token': access_token,
+            'refreshToken': refresh_token,
+            'user': {
+                'userId': user_id,
+                'email': user_data['email'],
+                'firstName': user_data.get('firstName'),
+                'lastName': user_data.get('lastName'),
+                'userType': user_data.get('userType'),
+            }
+        }
 
 
 auth_service = AuthService()
