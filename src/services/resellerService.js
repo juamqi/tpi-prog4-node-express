@@ -241,6 +241,133 @@ async deactivateAccount(userId) {
 
   return { message: 'Cuenta desactivada exitosamente' };
 }
+async getDetailedStats(userId) {
+  const userDoc = await db.collection('users').doc(userId).get();
+  
+  if (!userDoc.exists) {
+    throw new Error('Usuario no encontrado');
+  }
+
+  const userData = userDoc.data();
+
+  if (userData.userType !== 'reseller') {
+    throw new Error('No eres un revendedor');
+  }
+
+  const resellerDoc = await db.collection('resellers').doc(userId).get();
+  
+  if (!resellerDoc.exists) {
+    throw new Error('Datos de revendedor no encontrados');
+  }
+
+  const resellerData = resellerDoc.data();
+
+  const favoritesSnapshot = await db.collection('favorites')
+    .where('resellerId', '==', userId)
+    .where('isActive', '==', true)
+    .get();
+
+  const totalFavorites = favoritesSnapshot.size;
+
+  if (totalFavorites === 0) {
+    return {
+      totalFavorites: 0,
+      favoritesByCategory: [],
+      favoritesBySupplier: [],
+      priceRange: {
+        min: 0,
+        max: 0,
+        average: 0
+      },
+      lastFavoriteAdded: null
+    };
+  }
+
+  const categoriesMap = {};
+  const suppliersMap = {};
+  const prices = [];
+  let lastAddedDate = null;
+
+  for (const favoriteDoc of favoritesSnapshot.docs) {
+    const favoriteData = favoriteDoc.data();
+    const { productId, addedAt } = favoriteData;
+
+    const productDoc = await db.collection('products').doc(productId).get();
+    
+    if (!productDoc.exists || !productDoc.data().isActive) {
+      continue;
+    }
+
+    const productData = productDoc.data();
+    const { categoryId, supplierId, price: basePrice } = productData;
+
+    let markupType = favoriteData.markupType;
+    let markupValue = favoriteData.markupValue;
+
+    if (markupType === 'default') {
+      markupType = resellerData.markupType;
+      markupValue = resellerData.defaultMarkupValue;
+    }
+
+    let finalPrice = basePrice;
+    if (markupType === 'fixed') {
+      finalPrice = basePrice + markupValue;
+    } else if (markupType === 'percentage') {
+      finalPrice = basePrice * (1 + markupValue / 100);
+    }
+    finalPrice = Math.round(finalPrice * 100) / 100;
+
+    prices.push(finalPrice);
+
+    if (!categoriesMap[categoryId]) {
+      const categoryDoc = await db.collection('categories').doc(categoryId).get();
+      categoriesMap[categoryId] = {
+        categoryId,
+        categoryName: categoryDoc.exists ? categoryDoc.data().name : 'Sin categoría',
+        count: 0
+      };
+    }
+    categoriesMap[categoryId].count++;
+
+    if (!suppliersMap[supplierId]) {
+      const supplierDoc = await db.collection('suppliers').doc(supplierId).get();
+      suppliersMap[supplierId] = {
+        supplierId,
+        supplierName: supplierDoc.exists ? supplierDoc.data().companyName : 'Desconocido',
+        count: 0
+      };
+    }
+    suppliersMap[supplierId].count++;
+
+    if (addedAt) {
+      const addedDate = addedAt.toDate();
+      if (!lastAddedDate || addedDate > lastAddedDate) {
+        lastAddedDate = addedDate;
+      }
+    }
+  }
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
+  const favoritesByCategory = Object.values(categoriesMap)
+    .sort((a, b) => b.count - a.count);
+
+  const favoritesBySupplier = Object.values(suppliersMap)
+    .sort((a, b) => b.count - a.count);
+
+  return {
+    totalFavorites,
+    favoritesByCategory,
+    favoritesBySupplier,
+    priceRange: {
+      min: Math.round(minPrice * 100) / 100,
+      max: Math.round(maxPrice * 100) / 100,
+      average: Math.round(avgPrice * 100) / 100
+    },
+    lastFavoriteAdded: lastAddedDate
+  };
+}
 }
 
 module.exports = new ResellerService();

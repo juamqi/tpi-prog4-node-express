@@ -4,7 +4,6 @@ const functions = require('firebase-functions');
 const { admin, db, storage } = require('./utils/firebase');
 const emailService = require('./utils/emailService');
 const notificationService = require('./utils/notificationService');
-const catalogGenerator = require('./utils/catalogGenerator');
 
 //onusercreated
 exports.onUserCreated = functions.firestore
@@ -132,6 +131,14 @@ exports.onReviewCreated = functions.firestore
     const { productId, supplierId, resellerId, rating, comment } = reviewData;
 
     try {
+      // ✅ AGREGA ESTA VALIDACIÓN
+      console.log('Review data:', { productId, supplierId, resellerId, rating, comment });
+
+      if (!productId || !supplierId || !resellerId) {
+        console.error('Datos faltantes en la review:', { productId, supplierId, resellerId });
+        throw new Error('Review incompleta: faltan campos requeridos');
+      }
+
       const reviewsSnapshot = await db
         .collection('reviews')
         .where('productId', '==', productId)
@@ -186,6 +193,9 @@ exports.onReviewCreated = functions.firestore
       const productName = productDoc.data()?.name || 'Producto';
       const resellerName = `${resellerDoc.data()?.firstName} ${resellerDoc.data()?.lastName}`;
 
+      // ✅ AGREGA LOG ANTES DE CREAR LA NOTIFICACIÓN
+      console.log('Creando notificación con:', { supplierId, productId, productName, resellerName, rating });
+
       await notificationService.notifySupplierNewReview(
         supplierId,
         productId,
@@ -195,6 +205,9 @@ exports.onReviewCreated = functions.firestore
         comment
       );
 
+      // ✅ CONFIRMA QUE SE CREÓ
+      console.log('Notificación de review creada exitosamente');
+
       return { success: true };
     } catch (error) {
       console.error('Error en onReviewCreated:', error);
@@ -202,142 +215,122 @@ exports.onReviewCreated = functions.firestore
     }
   });
 
-//generate catalog pa el revendedor
-exports.generateCatalog = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-      'unauthenticated',
-      'El usuario debe estar autenticado'
-    );
-  }
 
-  const resellerId = context.auth.uid;
+//notificaciones de agregar producto al catalogo
+exports.onFavoriteAdded = functions.firestore
+  .document('favorites/{favoriteId}')
+  .onCreate(async (snap, context) => {
+    const { favoriteId } = context.params;
+    const favoriteData = snap.data();
+    const { productId, resellerId, markupType, markupValue } = favoriteData;
 
-  try {
-    const resellerDoc = await db.collection('resellers').doc(resellerId).get();
-    
-    if (!resellerDoc.exists) {
-      throw new functions.https.HttpsError(
-        'permission-denied',
-        'Solo los revendedores pueden generar catálogos'
-      );
-    }
-
-    const resellerData = resellerDoc.data();
-
-    const favoritesSnapshot = await db
-      .collection('favorites')
-      .where('resellerId', '==', resellerId)
-      .where('isActive', '==', true)
-      .get();
-
-    if (favoritesSnapshot.empty) {
-      throw new functions.https.HttpsError(
-        'failed-precondition',
-        'No tenes productos en favoritos para generar el catálogo'
-      );
-    }
-
-
-    const enrichedProducts = [];
-
-    for (const favoriteDoc of favoritesSnapshot.docs) {
-      const favoriteData = favoriteDoc.data();
-      const { productId, markupType, markupValue } = favoriteData;
-
+    try {
       const productDoc = await db.collection('products').doc(productId).get();
       
-      if (!productDoc.exists || !productDoc.data().isActive) {
-        continue; 
+      if (!productDoc.exists) {
+        console.error('Producto no encontrado');
+        return null;
       }
 
       const productData = productDoc.data();
+      const basePrice = productData.price;
 
-      const [supplierDoc, categoryDoc] = await Promise.all([
-        db.collection('suppliers').doc(productData.supplierId).get(),
-        db.collection('categories').doc(productData.categoryId).get(),
-      ]);
+      const resellerDoc = await db.collection('resellers').doc(resellerId).get();
+      const resellerData = resellerDoc.data();
 
-      let finalPrice = productData.price;
+      let finalPrice = basePrice;
+      let appliedMarkupType = markupType;
+      let appliedMarkupValue = markupValue;
 
-      if (markupType === 'fixed') {
-        finalPrice = productData.price + markupValue;
-      } else if (markupType === 'percentage') {
-        finalPrice = productData.price * (1 + markupValue / 100);
-      } else if (markupType === 'default') {
-        const defaultMarkupType = resellerData.markupType;
-        const defaultMarkupValue = resellerData.defaultMarkupValue;
-
-        if (defaultMarkupType === 'fixed') {
-          finalPrice = productData.price + defaultMarkupValue;
-        } else if (defaultMarkupType === 'percentage') {
-          finalPrice = productData.price * (1 + defaultMarkupValue / 100);
-        }
+      if (markupType === 'default') {
+        appliedMarkupType = resellerData.markupType;
+        appliedMarkupValue = resellerData.defaultMarkupValue;
       }
 
-      enrichedProducts.push({
-        ...productData,
+      if (appliedMarkupType === 'fixed') {
+        finalPrice = basePrice + appliedMarkupValue;
+      } else if (appliedMarkupType === 'percentage') {
+        finalPrice = basePrice * (1 + appliedMarkupValue / 100);
+      }
+
+      finalPrice = Math.round(finalPrice * 100) / 100;
+
+      await notificationService.notifyFavoriteAdded(
+        resellerId,
         productId,
-        finalPrice: Math.round(finalPrice * 100) / 100,
-        supplier: supplierDoc.exists ? supplierDoc.data() : null,
-        category: categoryDoc.exists ? categoryDoc.data() : null,
-      });
+        productData.name,
+        appliedMarkupType,
+        appliedMarkupValue,
+        finalPrice
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error en onFavoriteAdded:', error);
+      throw error;
     }
+  });
 
-    const productsByCategory = {};
+exports.onFavoriteMarkupUpdated = functions.firestore
+  .document('favorites/{favoriteId}')
+  .onUpdate(async (change, context) => {
+    const { favoriteId } = context.params;
+    const beforeData = change.before.data();
+    const afterData = change.after.data();
 
-    enrichedProducts.forEach((product) => {
-      const categoryName = product.category?.name || 'Sin categoría';
-      
-      if (!productsByCategory[categoryName]) {
-        productsByCategory[categoryName] = [];
+    try {
+      if (beforeData.markupType === afterData.markupType && 
+          beforeData.markupValue === afterData.markupValue) {
+        console.log('No hubo cambios en el markup');
+        return null;
       }
+
+      const { productId, resellerId, markupType, markupValue } = afterData;
+      const productDoc = await db.collection('products').doc(productId).get();
       
-      productsByCategory[categoryName].push(product);
-    });
+      if (!productDoc.exists) {
+        console.error('Producto no encontrado');
+        return null;
+      }
 
-    const catalogHTML = catalogGenerator.generateHTML({
-      resellerName: `${resellerData.firstName} ${resellerData.lastName}`,
-      resellerWebsite: resellerData.website || '',
-      resellerPhone: resellerData.phone || '',
-      productsByCategory,
-      generatedAt: new Date().toISOString(),
-    });
+      const productData = productDoc.data();
+      const basePrice = productData.price;
 
-    const fileName = `catalogs/${resellerId}/catalog_${Date.now()}.html`;
-    const bucket = storage.bucket();
-    const file = bucket.file(fileName);
+      const resellerDoc = await db.collection('resellers').doc(resellerId).get();
+      const resellerData = resellerDoc.data();
 
-    await file.save(catalogHTML, {
-      contentType: 'text/html',
-      metadata: {
-        cacheControl: 'public, max-age=3600',
-      },
-    });
+      let finalPrice = basePrice;
+      let appliedMarkupType = markupType;
+      let appliedMarkupValue = markupValue;
 
-    await file.makePublic();
+      if (markupType === 'default') {
+        appliedMarkupType = resellerData.markupType;
+        appliedMarkupValue = resellerData.defaultMarkupValue;
+      }
 
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+      if (appliedMarkupType === 'fixed') {
+        finalPrice = basePrice + appliedMarkupValue;
+      } else if (appliedMarkupType === 'percentage') {
+        finalPrice = basePrice * (1 + appliedMarkupValue / 100);
+      }
 
-    await resellerDoc.ref.update({
-      'catalogSettings.lastGenerated': admin.firestore.FieldValue.serverTimestamp(),
-      'catalogSettings.catalogUrl': publicUrl,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+      finalPrice = Math.round(finalPrice * 100) / 100;
 
-    await notificationService.notifyCatalogGenerated(resellerId, publicUrl);
+      await notificationService.notifyMarkupUpdated(
+        resellerId,
+        productId,
+        productData.name,
+        appliedMarkupType,
+        appliedMarkupValue,
+        finalPrice
+      );
 
-    return {
-      success: true,
-      catalogUrl: publicUrl,
-      productsCount: enrichedProducts.length,
-      categoriesCount: Object.keys(productsByCategory).length,
-    };
-  } catch (error) {
-    console.error('Error en generateCatalog:', error);
-    throw new functions.https.HttpsError('internal', error.message);
-  }
-});
+      return { success: true };
+    } catch (error) {
+      console.error('Error en onFavoriteMarkupUpdated:', error);
+      throw error;
+    }
+  });
 
 //onproductupdated
 exports.onProductUpdated = functions.firestore
